@@ -1,0 +1,89 @@
+[
+{"level": 1,
+"tpl": [
+["{}は好きですか", "Do you like {}?", "你喜欢{}吗？", "{} 좋아해요?", "¿Te gusta {}?"],
+["私は{}が好きです", "I like {}.", "我喜欢{}。", "저는 {} 좋아해요.", "Me gusta {}."]
+],
+"noun": [
+["コーヒー", "coffee", "咖啡", "커피", "el café"],
+["音楽", "music", "音乐", "음악", "la música"],
+["お茶", "tea", "茶", "차", "el té"],
+["チョコ", "chocolate", "巧克力", "초콜릿", "el chocolate"],
+["サッカー", "soccer", "足球", "축구", "el fútbol"],
+["ピザ", "pizza", "披萨", "피자", "la pizza"],
+["映画", "movies", "电影", "영화", "el cine"],
+["旅行", "traveling", "旅行", "여행", "viajar"],
+["料理", "cooking", "做饭", "요리", "cocinar"],
+["読書", "reading", "读书", "독서", "leer"],
+["スポーツ", "sports", "运动", "운동", "el deporte"],
+["野球", "baseball", "棒球", "야구", "el béisbol"],
+["テニス", "tennis", "网球", "테니스", "el tenis"],
+["寿司", "sushi", "寿司", "초밥", "el sushi"],
+["ラーメン", "ramen", "拉面", "라면", "el ramen"],
+["カレー", "curry", "咖喱", "카레", "el curry"],
+["歌", "singing", "唱歌", "노래", "cantar"],
+["踊り", "dancing", "跳舞", "춤", "bailar"],
+["絵", "drawing", "画画", "그림", "dibujar"],
+["水泳", "swimming", "游泳", "수영", "nadar"],
+["散歩", "walking", "散步", "산책", "caminar"],
+["写真", "photography", "摄影", "사진", "la fotografía"],
+["海", "the sea", "大海", "바다", "el mar"],
+["雪", "snow", "雪", "눈", "la nieve"]
+]},
+{"level": 1,
+"tpl": [
+["私は{}です", "I am {}.", "我是{}。", "저는 {}.", "Soy {}."]
+],
+"noun": [
+["先生", "a teacher", "老师", "선생님이에요", "profesor"],
+["医者", "a doctor", "医生", "의사예요", "médico"],
+["エンジニア", "an engineer", "工程师", "엔지니어예요", "ingeniero"],
+["看護師", "a nurse", "护士", "간호사예요", "enfermero"],
+["警察官", "a police officer", "警察", "경찰이에요", "policía"],
+["歌手", "a singer", "歌手", "가수예요", "cantante"],
+["料理人", "a chef", "厨师", "요리사예요", "cocinero"],
+["運転手", "a driver", "司机", "운전사예요", "conductor"],
+["弁護士", "a lawyer", "律师", "변호사예요", "abogado"],
+["美容師", "a hairdresser", "美发师", "미용사예요", "peluquero"],
+["農家", "a farmer", "农民", "농부예요", "agricultor"],
+["店員", "a shop clerk", "店员", "점원이에요", "dependiente"]
+]},
+{"level": 3,
+"tpl": [
+["{}はどこですか", "Where is {}?", "{}在哪里？", "{} 어디예요?", "¿Dónde está {}?"]
+],
+"noun": [
+["銀行", "the bank", "银行", "은행", "el banco"],
+["病院", "the hospital", "医院", "병원", "el hospital"],
+["郵便局", "the post office", "邮局", "우체국", "la oficina de correos"],
+["スーパー", "the supermarket", "超市", "슈퍼마켓", "el supermercado"],
+["コンビニ", "the convenience store", "便利店", "편의점", "la tienda de conveniencia"],
+["バス停", "the bus stop", "公交站", "버스 정류장", "la parada de autobús"],
+["警察署", "the police station", "警察局", "경찰서", "la comisaría"],
+["図書館", "the library", "图书馆", "도서관", "la biblioteca"],
+["公園", "the park", "公园", "공원", "el parque"],
+["出口", "the exit", "出口", "출구", "la salida"],
+["入口", "the entrance", "入口", "입구", "la entrada"],
+["空港", "the airport", "机场", "공항", "el aeropuerto"],
+["ホテル", "the hotel", "酒店", "호텔", "el hotel"],
+["エレベーター", "the elevator", "电梯", "엘리베이터", "el ascensor"]
+]},
+{"level": 4,
+"tpl": [
+["{}をください", "{}, please.", "请给我{}。", "{} 주세요.", "{}, por favor."]
+],
+"noun": [
+["コーヒー", "Coffee", "咖啡", "커피", "Un café"],
+["お茶", "Tea", "茶", "차", "Un té"],
+["水", "Water", "水", "물", "Agua"],
+["ビール", "Beer", "啤酒", "맥주", "Una cerveza"],
+["ジュース", "Juice", "果汁", "주스", "Un zumo"],
+["牛乳", "Milk", "牛奶", "우유", "Leche"],
+["パン", "Bread", "面包", "빵", "Pan"],
+["サラダ", "Salad", "沙拉", "샐러드", "Una ensalada"],
+["スープ", "Soup", "汤", "수프", "Una sopa"],
+["ステーキ", "Steak", "牛排", "스테이크", "Un filete"],
+["アイスクリーム", "Ice cream", "冰淇淋", "아이스크림", "Un helado"],
+["ケーキ", "Cake", "蛋糕", "케이크", "Una tarta"]
+]}
+]
