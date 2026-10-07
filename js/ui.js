@@ -13,10 +13,11 @@ const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10�
 
 function optOpen(){clearTimeout(tm);optShow()}
 function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>💌 意見・感想</h3><textarea id=fbt class=in rows=3 placeholder="ご意見・感想を書いてね"></textarea>
- <div class=chips>${CFG.mail?'<button class=chip onclick="sendFb(1)">📧 メールで送る</button>':''}<button class=chip onclick="sendFb(0)">🐙 GitHubで送る</button></div><small>GitHubで送ると内容は公開されます。個人情報は書かないでね。</small>
+ <div class=chips>${CFG.form&&CFG.entry?'<button class=chip onclick="sendFb(1)">📨 送信する（非公開）</button>':''}<button class=chip onclick="sendFb(0)">🐙 GitHubで送る（公開）</button></div><small>「非公開」は管理者だけに届きます。GitHubは内容が公開されます。個人情報は書かないでね。</small>
  <button class=big onclick="optClose()">とじる</button></div></div>`}
-function sendFb(m){const t=fbt.value.trim();if(!t)return alert('内容を入力してね');const e=encodeURIComponent;
- m?location.href='mailto:'+CFG.mail+'?subject='+e('ことばパーティ 意見')+'&body='+e(t):window.open(CFG.repo+'/issues/new?title='+e('意見・感想')+'&body='+e(t),'_blank','noopener')}
+async function sendFb(m){const t=fbt.value.trim();if(!t)return alert('内容を入力してね');const e=encodeURIComponent;
+ if(!m)return void window.open(CFG.repo+'/issues/new?title='+e('意見・感想')+'&body='+e(t),'_blank','noopener');
+ try{await fetch(CFG.form,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:CFG.entry+'='+e(t)});fbt.value='';alert('送信しました。ありがとう！')}catch(x){alert('送信できませんでした。通信を確認してね')}}
 function optClose(){modal.innerHTML='';if(document.getElementById('qc')&&!Q.lock)startT()}
 
 function home(){clearTimeout(tm);
