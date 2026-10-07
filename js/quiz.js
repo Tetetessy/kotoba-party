@@ -5,7 +5,8 @@ const rev=()=>P.filter(x=>okx(x)&&((D.items[S.lang+x.k]||{}).s||0)>0); // まち
 const shuf=a=>a.slice().sort(()=>Math.random()-.5);
 const norm=s=>s.normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g,c=>String.fromCharCode(c.charCodeAt(0)-96)).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\(.*?\)|[\s.,!?¿¡。、！？'"~\-]/g,'');
 // 同じ意味の判定: 表記ゆれ(ひらがな/カタカナ等)は自動、言い換えは data/synonyms.json の同義語グループで判定
-const same=(a,b)=>{const x=norm(a),y=norm(b);return x==y||(GID[x]!==undefined&&GID[x]==GID[y])};
+const strictB=it=>it.t=='b'&&it.lg==7; // ベトナム語の文字・発音は声調記号を区別する
+const same=(a,b,st)=>{if(st){const f=s=>s.normalize('NFC').toLowerCase().replace(/\s+/g,'');return f(a)==f(b)}const x=norm(a),y=norm(b);return x==y||(GID[x]!==undefined&&GID[x]==GID[y])};
 // 称号テーブル [正解率帯][スピード帯]。同条件ならこの中からランダム
 const EM=['🦴','🐣','🗣️','😎','👑'];
 const TT=[[['ダッシュで全滅隊','ハヤブサ級の迷子'],['言語原始人','石器時代の旅人'],['ねむれる原始人','のんびり古代人']],
@@ -32,13 +33,13 @@ function next(){clearTimeout(Q.at);
  if(Q.total&&Q.n>=Q.total)return result();
  const it=pick();Q.rc.push(it.k);if(Q.rc.length>6)Q.rc.shift();
  const d=Math.random()<.5,qi=d?0:S.lang,ai=d?S.lang:0,ans=it.a[ai],txt=S.fmt=='t'||(S.fmt=='mix'&&Math.random()<.5);
- const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans)))]).slice(0,3);
+ const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
  Q.cur={it,ans,d,txt,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
 function draw(){const c=Q.cur,it=c.it;
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
- <div class=card id=qc><small>${c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
+ <div class=card id=qc><small>${it.t=='b'?(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
  <div class=row style="justify-content:center"><button class=sm id=hb onclick="hint()">💡 ヒント</button></div><div id=hn class=hn></div>
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="こたえを入力" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
@@ -51,7 +52,7 @@ function startT(){clearTimeout(tm);Q.t0=Date.now();
 const sub=()=>ans(-2,document.getElementById('ti').value);
 function ans(i,txt){
  if(Q.lock)return;Q.lock=1;clearTimeout(tm);
- const c=Q.cur,out=i==-1,ok=!out&&(c.txt?same(txt,c.ans):c.opts[i]==c.ans),key=S.lang+c.it.k;
+ const c=Q.cur,out=i==-1,ok=!out&&(c.txt?same(txt,c.ans,strictB(c.it)):c.opts[i]==c.ans),key=S.lang+c.it.k;
  Q.ms+=out?S.time*1000:Date.now()-Q.t0;
  const o=D.items[key]||(D.items[key]={c:0,w:0,s:0}),t=D.tot[S.lang]||(D.tot[S.lang]={n:0,c:0});
  t.n++;if(ok){o.c++;o.s=Math.max(0,o.s-1);t.c++;Q.c++}else{o.w++;o.s+=2;Q.wrong.push(c.it)}

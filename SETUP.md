@@ -55,14 +55,13 @@ git push
 - 表示が古いときは **Ctrl + F5**（スマホはタブを閉じて開き直す）。
 
 ## 5. そのほかの操作
-- **意見を非公開で受け取る（Googleフォーム・無料・カード不要）**: メールアドレスは公開されません。
-  1. Googleフォームで新規フォームを作り、質問を1つ（段落）「ご意見・感想」にします。
-  2. 右上︙ →「事前入力したURLを取得」→ 質問に `test` と入力 →「リンクを取得」。
-  3. 取得したURL `https://docs.google.com/forms/d/e/【ID】/viewform?usp=pp_url&entry.【数字】=test` から
-     `form` = `https://docs.google.com/forms/d/e/【ID】/formResponse` ／ `entry` = `entry.【数字】` を作り、`js/config.js` に入れます。
-  4. フォームの「回答」タブ → ︙ →「新しい回答についてのメール通知を受け取る」をオン。
-  5. 手順4（git push）で反映。⚙ の一番下に「📨 送信する（非公開）」が出ます。
-- **GitHubで意見を受け取る**: リポジトリの Settings → General → Features で Issues にチェックが入っているか確認します。
+- **リリースノートを増やす**: `data/releases.json` の先頭に、`{"v":"v1.01","date":"日付","items":["更新内容"]}` を追加します（⚙ → 📝 リリースノート に出ます）。
+- **バージョンを付ける（v1.00）**: push後に次を実行します。
+  ```
+  git tag -a v1.00 -m "v1.00"
+  git push origin v1.00
+  ```
+- **意見箱**: ⚙の「📨 意見箱を開く」からGoogleフォームが開きます（送信先URLは `js/config.js` の `formView`）。回答はフォームの「回答」タブで確認し、新しい回答のメール通知はフォーム側でオンにします。
 - **データの書式チェック**（Pythonが入っている場合）
   ```
   python tools/check_data.py
