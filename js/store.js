@@ -1,7 +1,7 @@
 // 保存・アカウント（この端末のlocalStorageに保存。サーバー不要・無料）
 const ls={get(k,d){try{return JSON.parse(localStorage.getItem('kp.'+k))||d}catch(e){return d}},set(k,v){try{localStorage.setItem('kp.'+k,JSON.stringify(v))}catch(e){}}};
 const blank=()=>({items:{},tot:{},hist:[],titles:{}});
-let S={lang:1,lvl:0,kind:'mix',fmt:'mix',mode:0,time:0,auto:0,snd:1,...ls.get('set',{})};
+let S={lang:1,lvl:0,kind:'mix',fmt:'mix',mode:0,time:0,auto:0,snd:1,boost:1,...ls.get('set',{})};
 let AC=ls.get('acc',{}),ACC=ls.get('cur',null),D;
 if(!AC[ACC])ACC=null;
 const loadD=()=>{D={...blank(),...ls.get('d.'+(ACC||'guest'),{})}};loadD();
