@@ -50,23 +50,32 @@
 ]},
 {"level": 3,
 "tpl": [
-["{}はどこですか", "Where is {}?", "{}在哪里？", "{} 어디예요?", "¿Dónde está {}?"]
+["{}はどこですか", "Where is {}?", "{}在哪里？", "{} 어디예요?", "¿Dónde está {}?", "Dov'è {}?", "{}อยู่ที่ไหน", "Cho tôi hỏi, {} ở đâu?"]
 ],
 "noun": [
-["銀行", "the bank", "银行", "은행", "el banco"],
-["病院", "the hospital", "医院", "병원", "el hospital"],
-["郵便局", "the post office", "邮局", "우체국", "la oficina de correos"],
-["スーパー", "the supermarket", "超市", "슈퍼마켓", "el supermercado"],
-["コンビニ", "the convenience store", "便利店", "편의점", "la tienda de conveniencia"],
-["バス停", "the bus stop", "公交站", "버스 정류장", "la parada de autobús"],
-["警察署", "the police station", "警察局", "경찰서", "la comisaría"],
-["図書館", "the library", "图书馆", "도서관", "la biblioteca"],
-["公園", "the park", "公园", "공원", "el parque"],
-["出口", "the exit", "出口", "출구", "la salida"],
-["入口", "the entrance", "入口", "입구", "la entrada"],
-["空港", "the airport", "机场", "공항", "el aeropuerto"],
-["ホテル", "the hotel", "酒店", "호텔", "el hotel"],
-["エレベーター", "the elevator", "电梯", "엘리베이터", "el ascensor"]
+["銀行", "the bank", "银行", "은행", "el banco", "la banca", "ธนาคาร", "ngân hàng"],
+["病院", "the hospital", "医院", "병원", "el hospital", "l'ospedale", "โรงพยาบาล", "bệnh viện"],
+["郵便局", "the post office", "邮局", "우체국", "la oficina de correos", "l'ufficio postale", "ที่ทำการไปรษณีย์", "bưu điện"],
+["スーパー", "the supermarket", "超市", "슈퍼마켓", "el supermercado", "il supermercato", "ซูเปอร์มาร์เก็ต", "siêu thị"],
+["コンビニ", "the convenience store", "便利店", "편의점", "la tienda de conveniencia", "il minimarket", "ร้านสะดวกซื้อ", "cửa hàng tiện lợi"],
+["バス停", "the bus stop", "公交站", "버스 정류장", "la parada de autobús", "la fermata dell'autobus", "ป้ายรถเมล์", "trạm xe buýt"],
+["警察署", "the police station", "警察局", "경찰서", "la comisaría", "la stazione di polizia", "สถานีตำรวจ", "đồn cảnh sát"],
+["図書館", "the library", "图书馆", "도서관", "la biblioteca", "la biblioteca", "ห้องสมุด", "thư viện"],
+["公園", "the park", "公园", "공원", "el parque", "il parco", "สวนสาธารณะ", "công viên"],
+["出口", "the exit", "出口", "출구", "la salida", "l'uscita", "ทางออก", "lối ra"],
+["入口", "the entrance", "入口", "입구", "la entrada", "l'ingresso", "ทางเข้า", "lối vào"],
+["空港", "the airport", "机场", "공항", "el aeropuerto", "l'aeroporto", "สนามบิน", "sân bay"],
+["ホテル", "the hotel", "酒店", "호텔", "el hotel", "l'albergo", "โรงแรม", "khách sạn"],
+["エレベーター", "the elevator", "电梯", "엘리베이터", "el ascensor", "l'ascensore", "ลิฟต์", "thang máy"],
+["薬局", "the pharmacy", "药店", "약국", "la farmacia", "la farmacia", "ร้านขายยา", "hiệu thuốc"],
+["レストラン", "the restaurant", "餐厅", "레스토랑", "el restaurante", "il ristorante", "ร้านอาหาร", "nhà hàng"],
+["カフェ", "the café", "咖啡馆", "카페", "la cafetería", "il caffè", "ร้านกาแฟ", "quán cà phê"],
+["ATM", "the ATM", "自动取款机", "현금인출기", "el cajero automático", "il bancomat", "ตู้เอทีเอ็ม", "cây ATM"],
+["市場", "the market", "市场", "시장", "el mercado", "il mercato", "ตลาด", "chợ"],
+["観光案内所", "the tourist information office", "旅游咨询处", "관광 안내소", "la oficina de turismo", "l'ufficio informazioni turistiche", "ศูนย์ข้อมูลนักท่องเที่ยว", "trung tâm thông tin du lịch"],
+["お土産屋", "the souvenir shop", "纪念品商店", "기념품 가게", "la tienda de recuerdos", "il negozio di souvenir", "ร้านขายของที่ระลึก", "cửa hàng lưu niệm"],
+["本屋", "the bookstore", "书店", "서점", "la librería", "la libreria", "ร้านหนังสือ", "hiệu sách"],
+["タクシー乗り場", "the taxi stand", "出租车站", "택시 승강장", "la parada de taxis", "il posteggio dei taxi", "จุดจอดแท็กซี่", "bến taxi"]
 ]},
 {"level": 4,
 "tpl": [
@@ -84,5 +93,32 @@
 ["ステーキ", "Steak", "牛排", "스테이크", "Un filete"],
 ["アイスクリーム", "Ice cream", "冰淇淋", "아이스크림", "Un helado"],
 ["ケーキ", "Cake", "蛋糕", "케이크", "Una tarta"]
+]},
+{"level": 3,
+"tpl": [
+["この近くに{}はありますか", "Is there {} near here?", "这附近有{}吗？", "이 근처에 {} 있어요?", "¿Hay {} cerca de aquí?", "C'è {} qui vicino?", "แถวนี้มี{}ไหม", "Gần đây có {} không?"],
+["{}を探しています", "I'm looking for {}.", "我在找{}。", "{} 찾고 있어요.", "Estoy buscando {}.", "Sto cercando {}.", "ฉันกำลังมองหา{}", "Tôi đang tìm {}."]
+],
+"noun": [
+["病院", "a hospital", "医院", "병원", "un hospital", "un ospedale", "โรงพยาบาล", "bệnh viện"],
+["薬局", "a pharmacy", "药店", "약국", "una farmacia", "una farmacia", "ร้านขายยา", "hiệu thuốc"],
+["郵便局", "a post office", "邮局", "우체국", "una oficina de correos", "un ufficio postale", "ที่ทำการไปรษณีย์", "bưu điện"],
+["スーパー", "a supermarket", "超市", "슈퍼마켓", "un supermercado", "un supermercato", "ซูเปอร์มาร์เก็ต", "siêu thị"],
+["コンビニ", "a convenience store", "便利店", "편의점", "una tienda de conveniencia", "un minimarket", "ร้านสะดวกซื้อ", "cửa hàng tiện lợi"],
+["レストラン", "a restaurant", "餐厅", "레스토랑", "un restaurante", "un ristorante", "ร้านอาหาร", "nhà hàng"],
+["カフェ", "a café", "咖啡馆", "카페", "una cafetería", "un caffè", "ร้านกาแฟ", "quán cà phê"],
+["ATM", "an ATM", "自动取款机", "현금인출기", "un cajero automático", "un bancomat", "ตู้เอทีเอ็ม", "cây ATM"],
+["トイレ", "a restroom", "洗手间", "화장실", "un baño", "un bagno", "ห้องน้ำ", "nhà vệ sinh"],
+["コインロッカー", "a coin locker", "投币储物柜", "코인 로커", "una taquilla", "un armadietto a gettoni", "ตู้ล็อกเกอร์หยอดเหรียญ", "tủ khóa gửi đồ"],
+["ホテル", "a hotel", "酒店", "호텔", "un hotel", "un albergo", "โรงแรม", "khách sạn"],
+["バス停", "a bus stop", "公交站", "버스 정류장", "una parada de autobús", "una fermata dell'autobus", "ป้ายรถเมล์", "trạm xe buýt"],
+["タクシー乗り場", "a taxi stand", "出租车站", "택시 승강장", "una parada de taxis", "un posteggio dei taxi", "จุดจอดแท็กซี่", "bến taxi"],
+["観光案内所", "a tourist information office", "旅游咨询处", "관광 안내소", "una oficina de turismo", "un ufficio informazioni turistiche", "ศูนย์ข้อมูลนักท่องเที่ยว", "trung tâm thông tin du lịch"],
+["お土産屋", "a souvenir shop", "纪念品商店", "기념품 가게", "una tienda de recuerdos", "un negozio di souvenir", "ร้านขายของที่ระลึก", "cửa hàng lưu niệm"],
+["本屋", "a bookstore", "书店", "서점", "una librería", "una libreria", "ร้านหนังสือ", "hiệu sách"],
+["公衆電話", "a public phone", "公用电话", "공중전화", "un teléfono público", "un telefono pubblico", "โทรศัพท์สาธารณะ", "điện thoại công cộng"],
+["警察署", "a police station", "警察局", "경찰서", "una comisaría", "una stazione di polizia", "สถานีตำรวจ", "đồn cảnh sát"],
+["空港", "an airport", "机场", "공항", "un aeropuerto", "un aeroporto", "สนามบิน", "sân bay"],
+["市場", "a market", "市场", "시장", "un mercado", "un mercato", "ตลาด", "chợ"]
 ]}
 ]

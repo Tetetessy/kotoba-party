@@ -201,5 +201,20 @@
 ["2", "傘を忘れました", "I forgot my umbrella.", "我忘带伞了。", "우산을 두고 왔어요.", "Olvidé mi paraguas."],
 ["2", "部屋を掃除します", "I clean my room.", "我打扫房间。", "방을 청소해요.", "Limpio mi habitación."],
 ["2", "友達に手紙を書きます", "I write a letter to a friend.", "我给朋友写信。", "친구에게 편지를 써요.", "Le escribo una carta a un amigo."],
-["2", "一緒に昼ごはんを食べませんか", "Would you like to have lunch together?", "要不要一起吃午饭？", "같이 점심 먹을래요?", "¿Quieres comer juntos?"]
+["2", "一緒に昼ごはんを食べませんか", "Would you like to have lunch together?", "要不要一起吃午饭？", "같이 점심 먹을래요?", "¿Quieres comer juntos?"],
+["3", "切符を二枚ください", "Two tickets, please.", "请给我两张票。", "표 두 장 주세요.", "Dos billetes, por favor."],
+["3", "次の電車は何時ですか", "What time is the next train?", "下一班火车几点？", "다음 전철은 몇 시예요?", "¿A qué hora sale el próximo tren?"],
+["3", "この電車は東京に行きますか", "Does this train go to Tokyo?", "这趟火车去东京吗？", "이 전철은 도쿄에 가요?", "¿Este tren va a Tokio?"],
+["3", "どこで乗り換えますか", "Where do I transfer?", "在哪里换乘？", "어디에서 갈아타요?", "¿Dónde hago el transbordo?"],
+["3", "片道でお願いします", "One way, please.", "请给我单程票。", "편도로 주세요.", "Solo ida, por favor."],
+["3", "荷物を預けたいです", "I'd like to leave my luggage.", "我想寄存行李。", "짐을 맡기고 싶어요.", "Quisiera dejar mi equipaje."],
+["3", "朝食は付いていますか", "Is breakfast included?", "含早餐吗？", "조식이 포함돼 있어요?", "¿Incluye el desayuno?"],
+["3", "チェックアウトは何時ですか", "What time is check-out?", "几点退房？", "체크아웃은 몇 시예요?", "¿A qué hora es la salida del hotel?"],
+["3", "もう一泊したいです", "I'd like to stay one more night.", "我想再住一晚。", "하룻밤 더 묵고 싶어요.", "Quisiera quedarme una noche más."],
+["3", "別の色はありますか", "Do you have another color?", "有别的颜色吗？", "다른 색 있어요?", "¿Tiene otro color?"],
+["3", "袋はいりません", "I don't need a bag.", "我不需要袋子。", "봉투는 필요 없어요.", "No necesito bolsa."],
+["3", "プレゼント用に包んでください", "Please gift-wrap it.", "请帮我包装成礼物。", "선물용으로 포장해 주세요.", "Envuélvalo para regalo, por favor."],
+["3", "入場料はいくらですか", "How much is the admission fee?", "门票多少钱？", "입장료는 얼마예요?", "¿Cuánto cuesta la entrada?"],
+["3", "電車が遅れています", "The train is delayed.", "火车晚点了。", "전철이 지연되고 있어요.", "El tren va con retraso."],
+["3", "ここで降ります", "I'll get off here.", "我在这里下车。", "여기서 내릴게요.", "Me bajo aquí."]
 ]

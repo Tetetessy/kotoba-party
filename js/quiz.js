@@ -14,9 +14,10 @@ const TT=[[['ダッシュで全滅隊','ハヤブサ級の迷子'],['言語原�
 [['ひらめき小僧','スピードおしゃべり'],['おしゃべり見習い','旅の相棒'],['コツコツ職人','ていねい旅人']],
 [['光速トランスレーター','電光石火の達人'],['会話の達人','ことばの魔法使い'],['慎重な賢者','落ち着きの哲学者']],
 [['言語の神','神速マスター'],['言語マスター','パーフェクト王'],['ぎりぎり完璧','無双の学者']]];
+const CH=['🦖','🐣','🦊','🦄','🐉'],AL=['正解率0%','正解率1〜49%','正解率50〜79%','正解率80〜99%','正解率100%'],SL=['平均4秒未満','平均4〜8秒','平均8秒以上'];
 const TOTAL=TT.flat(2).length;
 function award(p,avg){const a=p==0?0:p<50?1:p<80?2:p<100?3:4,s=avg<4?0:avg<8?1:2,
- t=EM[a]+TT[a][s][Math.random()*2|0],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:['🦖','🐣','🦊','🦄','🐉'][a]}}
+ t=EM[a]+TT[a][s][Math.random()*2|0],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[a]}}
 
 function start(){Q={n:0,c:0,ms:0,hints:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
 function pick(){
@@ -69,9 +70,9 @@ function ans(i,txt){
 // ヒント: 日本語→外国語=解答例を発音 / 外国語→日本語=品詞・最初の文字だけ
 function hint(){if(Q.lock)return;const c=Q.cur,it=c.it;Q.hints++;let h;
  if(c.d){speak(c.ans);h='🔊 解答例を読み上げました'}
- else if(it.t=='b'){const m=c.ans.match(/\((.*?)\)/);h=m?'読み（かな）: '+m[1]:'最初の文字は「'+c.ans[0]+'」（'+c.ans.length+'文字）'}
- else if(it.t=='w'){const p=POS[it.a[0]];h=p?'品詞: '+p+'（'+c.ans.length+'文字）':'最初の文字は「'+c.ans[0]+'」（'+c.ans.length+'文字）'}
- else{const n=Math.ceil(c.ans.length*.2);h='「'+c.ans.slice(0,n)+'…」から始まります'}
+ else if(it.t=='b')h='読み（かな）: '+((c.ans.match(/\((.*?)\)/)||[])[1]||'最初の文字は「'+c.ans[0]+'」');
+ else if(it.t=='w'){speak(c.ans,'ja-JP');h='🔊 正解の単語を読み上げました'}
+ else{const L2=c.ans.length,n=Math.ceil(L2*.2),t=L2>=n*2+2?c.ans.slice(-n):'';h='「'+c.ans.slice(0,n)+'…'+t+'」（最初'+(t?'と最後':'')+'の部分）'}
  document.getElementById('hn').textContent='💡 '+h}
 function quit(){clearTimeout(tm);clearTimeout(Q.at);Q.n?result():home()}
 function result(){clearTimeout(tm);clearTimeout(Q.at);
