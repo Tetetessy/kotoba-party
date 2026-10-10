@@ -1,14 +1,13 @@
 // 画面: ホーム / オプション / アカウント / きろく
 const app=document.getElementById('app'),modal=document.getElementById('modal');
-const grp=(k,o,f='set')=>`<div class=chips>${o.map(([v,l])=>`<button class="chip ${S[k]===v?'on':''}" onclick="${f}('${k}',${JSON.stringify(v).replace(/"/g,"'")})">${l}</button>`).join('')}</div>`;
+const grp=(k,o,f='set',c='chips')=>`<div class=${c}>${o.map(([v,l,g])=>`<button class="chip ${S[k]===v?'on':''}${g?' ghost':''}" ${g?'disabled tabindex=-1 aria-hidden=true ':''}onclick="${f}('${k}',${JSON.stringify(v).replace(/"/g,"'")})">${l}</button>`).join('')}</div>`;
 const set=(k,v)=>{S[k]=v;save();home()};
 const setO=(k,v)=>{S[k]=v;save();optShow()};
 const setVol=v=>{S.vol=+v;save();SND.ok()};
-const KL=()=>[['mix','ミックス'],['w','単語のみ'],['s','文章のみ'],['r','🔁 まちがい復習（'+rev().length+'）'],...(P.some(x=>x.lg==S.lang)?[['b','文字・発音']]:[])],FM=[['mix','ミックス'],['c','4択'],['t','入力']];
+// KL: 出題の選択肢。3つ目=1は見えない場所取り（言語を切り替えても折り返しが変わらず、スタートボタンがずれない）
+const KL=()=>[['mix','ミックス'],['w','単語のみ'],['s','文章のみ'],['r','🔁 まちがい復習（'+rev().length+'）'],...(P.some(x=>x.lg==S.lang)?[['b','文字・発音']]:[['b','文字・発音',1]])],FM=[['mix','ミックス'],['c','4択'],['t','入力']];
 const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10秒'],[15,'15秒']],f)}
 <h3>➡ 解説のあと</h3>${grp('auto',[[0,'手動（つぎへ）'],[1,'自動で進む']],f)}
-<h3>📚 出題</h3>${grp('kind',KL(),f)}
-<h3>✍ 形式</h3>${grp('fmt',FM,f)}
 <h3>🔥 苦手を多めに出す</h3>${grp('boost',[[1,'ON'],[0,'OFF']],f)}
 <h3>🔊 音量　<small>（0でミュート）</small></h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.vol} style="--f:${S.vol/10}" aria-label=音量 oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10)" onchange="setVol(this.value)"><b>${S.vol}</b></div>`;
 
@@ -20,15 +19,16 @@ function notes(){modal.innerHTML=`<div class=mask><div class=card><h2 style="mar
 function optClose(){modal.innerHTML='';if(document.getElementById('qc')&&!Q.lock)startT()}
 
 function home(){clearTimeout(tm);
+ const hasB=P.some(x=>x.lg==S.lang),lim=S.lang>4; // hasB: 文字・発音あり / lim: ④以降が未収録の言語
  app.innerHTML=`<div class=top><button class=sm onclick="acct()">👤 ${uname()}</button><button class=sm onclick="optOpen()">⚙</button></div>
  <h1><span>🎈</span> ことばパーティ</h1>
- <div class=tip><span class=ph>✨ 右上の⚙で、</span><span class=ph>制限時間・自動で次へ・音量・まちがい復習の設定や、</span><span class=ph>意見の送信もできるよ！</span><span class=ph>のぞいてみてね🎵</span></div>
- <h3>学ぶ言語</h3>${grp('lang',ORD.map(i=>[i,F[i]+' '+L[i]]))}
- <h3>🎯 レベル</h3><select class=sel onchange="set('lvl',+this.value)">${LV.map((l,i)=>`<option value=${i} ${S.lvl==i?'selected':''}>${l}</option>`).join('')}</select>
+ <div class=tip><span class=ph>✨ 右上の⚙で、</span><span class=ph>制限時間・自動で次へ・</span><span class=ph>苦手を多めに出す・音量の設定や、</span><span class=ph>意見の送信もできるよ！</span><span class=ph>のぞいてみてね🎵</span></div>
+ <h3>学ぶ言語</h3>${grp('lang',ORD.map(i=>[i,F[i]+' '+L[i]]),'set','langs')}
+ <div class=hrow><h3>🎯 レベル</h3><small class=lvnote>${lim?'※ ①〜③のみ収録（④以降は順次追加）':''}</small></div><select class=sel onchange="set('lvl',+this.value)">${LV.map((l,i)=>`<option value=${i} ${S.lvl==i?'selected':''}>${l}</option>`).join('')}</select>
  <h3>🔢 問題数</h3>${grp('mode',[[0,'♾ ひたすら'],[10,'10問'],[20,'20問'],[30,'30問']])}
- <h3>📚 出題</h3>${grp('kind',KL())}<h3>✍ 形式</h3>${grp('fmt',FM)}
- ${S.lang>4?'<small><span class=ph>※ この言語は</span><span class=ph>レベル①〜③のみ</span><span class=ph>収録済みです。</span><span class=ph>（④以降は順次追加）</span></small>':''}
- ${P.some(x=>x.lg==S.lang)?'<button class="big m" onclick="tbl()">📖 文字表を見る</button>':''}<button class=big onclick="start()">スタート！</button><button class="big alt" onclick="stats()">📊 きろく・称号</button>
+ <div class=hrow><h3>📚 出題</h3>${hasB?'<button class=sm onclick="tbl()">📖 文字表</button>':''}</div>${grp('kind',KL())}
+ <h3>✍ 形式</h3>${grp('fmt',FM)}
+ <button class=big onclick="start()">スタート！</button><button class="big alt" onclick="stats()">📊 きろく・称号</button>
  ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`}
 
 function tbl(){const x=P.filter(p=>p.lg==S.lang);

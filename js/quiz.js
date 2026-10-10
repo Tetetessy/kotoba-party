@@ -48,7 +48,10 @@ function draw(){const c=Q.cur,it=c.it;
  const ti=document.getElementById('ti');if(ti)ti.focus();startT()}
 
 function startT(){clearTimeout(tm);Q.t0=Date.now();
- if(S.time&&!Q.lock){const b=document.getElementById('tb');if(b){b.style.transition='none';b.style.width='100%';b.offsetWidth;b.style.transition=`width ${S.time}s linear`;b.style.width='0'}
+ let b=document.getElementById('tb'); // ⚙で制限時間を変えたときも、バーと実際のタイマーをそろえる
+ if(S.time&&!b&&!Q.lock){document.querySelector('.top').insertAdjacentHTML('afterend','<div class=bar style="margin-top:10px"><i id=tb></i></div>');b=document.getElementById('tb')}
+ if(!S.time&&b){b.parentElement.remove();b=null}
+ if(S.time&&!Q.lock){if(b){b.style.transition='none';b.style.width='100%';b.offsetWidth;b.style.transition=`width ${S.time}s linear`;b.style.width='0'}
  tm=setTimeout(()=>ans(-1),S.time*1000)}}
 
 const sub=()=>ans(-2,document.getElementById('ti').value);
