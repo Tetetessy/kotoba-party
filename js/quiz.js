@@ -8,14 +8,20 @@ const norm=s=>s.normalize('NFKC').toLowerCase().replace(/[ァ-ヶ]/g,c=>String.f
 const strictB=it=>it.t=='b'&&it.lg==7; // ベトナム語の文字・発音は声調記号を区別する
 const same=(a,b,st)=>{if(st){const f=s=>s.normalize('NFC').toLowerCase().replace(/\s+/g,'');return f(a)==f(b)}const x=norm(a),y=norm(b);return x==y||(GID[x]!==undefined&&GID[x]==GID[y])};
 // 称号テーブル [正解率帯][スピード帯]。同条件ならこの中からランダム
-const EM=['🦴','🐣','🗣️','😎','👑'];
+const EM=['🦴','🐣','🗣️','😎','👑','💤']; // 5番目(💤)は、とちゅうでおわったとき用
 const TT=[[['ダッシュで全滅隊','ハヤブサ級の迷子'],['言語原始人','石器時代の旅人'],['ねむれる原始人','のんびり古代人']],
 [['おっちょこ勇者','せっかち見習い'],['ことばひよこ','ヨチヨチ冒険者'],['じっくりカメ','かたつむり学徒']],
 [['ひらめき小僧','スピードおしゃべり'],['おしゃべり見習い','旅の相棒'],['コツコツ職人','ていねい旅人']],
 [['光速トランスレーター','電光石火の達人'],['会話の達人','ことばの魔法使い'],['慎重な賢者','落ち着きの哲学者']],
 [['言語の神','神速マスター'],['言語マスター','パーフェクト王'],['ぎりぎり完璧','無双の学者']]];
-const CH=['🦖','🐣','🦊','🦄','🐉'],AL=['正解率0%','正解率1〜49%','正解率50〜79%','正解率80〜99%','正解率100%'],SL=['平均4秒未満','平均4〜8秒','平均8秒以上'];
-const TOTAL=TT.flat(2).length;
+const CH=['🦖','🐣','🦊','🦄','🐉','🐢'],AL=['正解率0%','正解率1〜49%','正解率50〜79%','正解率80〜99%','正解率100%'],SL=['平均4秒未満','平均4〜8秒','平均8秒以上'];
+// とちゅう称号: 10問以内でおわったとき（「ひたすら」も含む）。[1〜3問でおわる / 4〜10問でおわる] からランダム
+const TI=[['ふらっと立ち寄り客','ちらっと見学の旅人','おためし一歩さん'],['ひと休み中の冒険者','また来るね名人','のんびり寄り道旅人']],SI=['1〜3問でおわる','4〜10問でおわる'];
+const tName=(a,s,k)=>a==5?TI[s][k]:TT[a][s][k];
+const tBand=(a,s)=>a==5?'とちゅうでおわった ・ '+SI[s]:AL[a]+' ・ '+SL[s];
+const lockTxt=(a,s)=>a==5?'とちゅうでおわる<br>'+SI[s]:AL[a]+'<br>'+SL[s];
+const TOTAL=TT.flat(2).length+TI.flat().length;
+function awardI(n){const s=n<=3?0:1,k=Math.random()*TI[s].length|0,t=EM[5]+TI[s][k],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[5]}}
 function award(p,avg){const a=p==0?0:p<50?1:p<80?2:p<100?3:4,s=avg<4?0:avg<8?1:2,
  t=EM[a]+TT[a][s][Math.random()*2|0],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[a]}}
 
@@ -41,7 +47,7 @@ const canHint=c=>!c.d&&c.it.t=='s'; // 答えを読み上げてしまう問題�
 function draw(){const c=Q.cur,it=c.it;
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
- <div class=card id=qc><small>${it.t=='b'?(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
+ <div class=card id=qc><small>${it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字・発音<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
  ${canHint(c)?'<div class=row style="justify-content:center"><button class=sm id=hb onclick="hint()">💡 ヒント</button></div><div id=hn class=hn></div>':''}
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="こたえを入力" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
@@ -75,12 +81,12 @@ function ans(i,txt){
 function hint(){if(Q.lock||!canHint(Q.cur))return;const c=Q.cur;Q.hints++;
  const tot=Math.max(1,Math.ceil(c.ans.length*.2)),hd=Math.ceil(tot/2),tl=tot-hd;
  document.getElementById('hn').textContent='💡 「'+c.ans.slice(0,hd)+'…'+(tl?c.ans.slice(-tl):'')+'」（最初'+(tl?'と最後':'')+'の部分）'}
-function quit(){clearTimeout(tm);clearTimeout(Q.at);Q.n?result():home()}
-function result(){clearTimeout(tm);clearTimeout(Q.at);
- const p=Math.round(Q.c/Q.n*100),avg=Q.ms/Q.n/1000,r=award(p,avg);
+function quit(){clearTimeout(tm);clearTimeout(Q.at);Q.n?result(Q.n<=10&&!(Q.total&&Q.n>=Q.total)):home()} // 10問以内でおわると、とちゅう称号
+function result(intr){clearTimeout(tm);clearTimeout(Q.at);
+ const p=Math.round(Q.c/Q.n*100),avg=Q.ms/Q.n/1000,r=intr?awardI(Q.n):award(p,avg);
  D.hist.push({d:new Date().toLocaleDateString('ja-JP'),l:S.lang,n:Q.n,c:Q.c});D.hist=D.hist.slice(-30);save();
  const seen=[...new Set(Q.wrong.map(x=>x.k))].map(k=>Q.wrong.find(x=>x.k==k));
- app.innerHTML=`<div class=card><div class=chr>${r.ch}</div><small>あなたの称号は…</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
- <div style="font-size:1.2rem;margin-top:8px">${Q.n}問中 ${Q.c}問 正解（${p}%）</div><small>平均 ${avg.toFixed(1)}秒 / 問${Q.hints?' ・ヒント'+Q.hints+'回':''}</small></div>
+ app.innerHTML=`<div class=card><div class=chr>${r.ch}</div><small>${intr?'とちゅうでおわった あなたの称号は…':'あなたの称号は…'}</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
+ <div style="font-size:1.2rem;margin-top:8px">${intr?'ここまで '+Q.n+'問 ・ '+Q.c+'問 正解（'+p+'%）':Q.n+'問中 '+Q.c+'問 正解（'+p+'%）'}</div>${intr?'<small>10問以内でおわったので、とちゅう称号です</small><br>':''}<small>平均 ${avg.toFixed(1)}秒 / 問${Q.hints?' ・ヒント'+Q.hints+'回':''}</small></div>
  ${seen.length?'<h3>まちがえた問題（多めに出ます）</h3>'+seen.map(x=>`<div class=row><span>${x.a[0]}</span><span>${x.a[S.lang]}</span></div>`).join(''):'<h3>ノーミス！すごい🎊</h3>'}
  <button class=big onclick="start()">もう一回！</button><button class="big alt" onclick="home()">ホームへ</button>`}
