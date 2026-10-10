@@ -37,11 +37,12 @@ function next(){clearTimeout(Q.at);
  const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
  Q.cur={it,ans,d,txt,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
+const canHint=c=>!c.d&&c.it.t=='s'; // 答えを読み上げてしまう問題にはヒントなし。文章の外国語→日本語だけ、先頭と末尾を見せる
 function draw(){const c=Q.cur,it=c.it;
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
  <div class=card id=qc><small>${it.t=='b'?(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
- <div class=row style="justify-content:center"><button class=sm id=hb onclick="hint()">💡 ヒント</button></div><div id=hn class=hn></div>
+ ${canHint(c)?'<div class=row style="justify-content:center"><button class=sm id=hb onclick="hint()">💡 ヒント</button></div><div id=hn class=hn></div>':''}
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="こたえを入力" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
  const ti=document.getElementById('ti');if(ti)ti.focus();startT()}
@@ -67,13 +68,10 @@ function ans(i,txt){
  <button class="big m" onclick="next()">${last?'結果を見る':'つぎへ'}</button>${S.auto?'<small>自動で進みます…</small>':''}</div>`;
  if(S.auto)Q.at=setTimeout(next,ok?1300:2600)}
 
-// ヒント: 日本語→外国語=解答例を発音 / 外国語→日本語=品詞・最初の文字だけ
-function hint(){if(Q.lock)return;const c=Q.cur,it=c.it;Q.hints++;let h;
- if(c.d){speak(c.ans);h='🔊 解答例を読み上げました'}
- else if(it.t=='b')h='読み（かな）: '+((c.ans.match(/\((.*?)\)/)||[])[1]||'最初の文字は「'+c.ans[0]+'」');
- else if(it.t=='w'){speak(c.ans,'ja-JP');h='🔊 正解の単語を読み上げました'}
- else{const L2=c.ans.length,n=Math.ceil(L2*.2),t=L2>=n*2+2?c.ans.slice(-n):'';h='「'+c.ans.slice(0,n)+'…'+t+'」（最初'+(t?'と最後':'')+'の部分）'}
- document.getElementById('hn').textContent='💡 '+h}
+// ヒント（文章の外国語→日本語のみ）: 正解の全体の約2割（切り上げ）を、最初と最後に分けて見せる
+function hint(){if(Q.lock||!canHint(Q.cur))return;const c=Q.cur;Q.hints++;
+ const tot=Math.max(1,Math.ceil(c.ans.length*.2)),hd=Math.ceil(tot/2),tl=tot-hd;
+ document.getElementById('hn').textContent='💡 「'+c.ans.slice(0,hd)+'…'+(tl?c.ans.slice(-tl):'')+'」（最初'+(tl?'と最後':'')+'の部分）'}
 function quit(){clearTimeout(tm);clearTimeout(Q.at);Q.n?result():home()}
 function result(){clearTimeout(tm);clearTimeout(Q.at);
  const p=Math.round(Q.c/Q.n*100),avg=Q.ms/Q.n/1000,r=award(p,avg);
