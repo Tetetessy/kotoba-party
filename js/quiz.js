@@ -25,7 +25,7 @@ function awardI(n){const s=n<=3?0:1,k=Math.random()*TI[s].length|0,t=EM[5]+TI[s]
 function award(p,avg){const a=p==0?0:p<50?1:p<80?2:p<100?3:4,s=avg<4?0:avg<8?1:2,
  t=EM[a]+TT[a][s][Math.random()*2|0],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[a]}}
 
-function start(){Q={n:0,c:0,ms:0,hints:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
+function start(){Q={n:0,c:0,ms:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
 function pick(){
  let t=S.kind=='mix'?(Math.random()<Q.p?'s':'w'):S.kind;
  if(t=='b'&&!P.some(x=>x.lg==S.lang))t='w';
@@ -43,12 +43,10 @@ function next(){clearTimeout(Q.at);
  const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
  Q.cur={it,ans,d,txt,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
-const canHint=c=>!c.d&&c.it.t=='s'; // 答えを読み上げてしまう問題にはヒントなし。文章の外国語→日本語だけ、先頭と末尾を見せる
 function draw(){const c=Q.cur,it=c.it;
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
  <div class=card id=qc><small>${it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字・発音<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語'} <span class=tag>${c.txt?'入力':'4択'}</span></small><h2>${it.a[c.d?0:S.lang]}</h2>${c.d?'':'<button class=sm onclick="speak(Q.cur.it.a[S.lang])">🔊</button>'}</div>
- ${canHint(c)?'<div class=row style="justify-content:center"><button class=sm id=hb onclick="hint()">💡 ヒント</button></div><div id=hn class=hn></div>':''}
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="こたえを入力" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
  const ti=document.getElementById('ti');if(ti)ti.focus();startT()}
@@ -67,7 +65,7 @@ function ans(i,txt){
  Q.ms+=out?S.time*1000:Date.now()-Q.t0;
  const o=D.items[key]||(D.items[key]={c:0,w:0,s:0}),t=D.tot[S.lang]||(D.tot[S.lang]={n:0,c:0});
  t.n++;if(ok){o.c++;o.s=Math.max(0,o.s-1);t.c++;Q.c++}else{o.w++;o.s+=2;Q.wrong.push(c.it)}
- Q.n++;save();fx(ok);document.getElementById('hb')?.remove();
+ Q.n++;save();fx(ok);
  document.getElementById('qc').classList.add(ok?'okc':'ngc');
  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=1;if(c.opts[j]==c.ans)b.classList.add('ok');else if(j==i)b.classList.add('ng')});
  const ti=document.getElementById('ti');if(ti){ti.disabled=1;ti.classList.add(ok?'ok':'ng');ti.nextElementSibling.remove()}
@@ -77,16 +75,12 @@ function ans(i,txt){
  <button class="big m" onclick="next()">${last?'結果を見る':'つぎへ'}</button>${S.auto?'<small>自動で進みます…</small>':''}</div>`;
  if(S.auto)Q.at=setTimeout(next,ok?1300:2600)}
 
-// ヒント（文章の外国語→日本語のみ）: 正解の全体の約2割（切り上げ）を、最初と最後に分けて見せる
-function hint(){if(Q.lock||!canHint(Q.cur))return;const c=Q.cur;Q.hints++;
- const tot=Math.max(1,Math.ceil(c.ans.length*.2)),hd=Math.ceil(tot/2),tl=tot-hd;
- document.getElementById('hn').textContent='💡 「'+c.ans.slice(0,hd)+'…'+(tl?c.ans.slice(-tl):'')+'」（最初'+(tl?'と最後':'')+'の部分）'}
 function quit(){clearTimeout(tm);clearTimeout(Q.at);Q.n?result(Q.n<=10&&!(Q.total&&Q.n>=Q.total)):home()} // 10問以内でおわると、とちゅう称号
 function result(intr){clearTimeout(tm);clearTimeout(Q.at);
  const p=Math.round(Q.c/Q.n*100),avg=Q.ms/Q.n/1000,r=intr?awardI(Q.n):award(p,avg);
  D.hist.push({d:new Date().toLocaleDateString('ja-JP'),l:S.lang,n:Q.n,c:Q.c});D.hist=D.hist.slice(-30);save();
  const seen=[...new Set(Q.wrong.map(x=>x.k))].map(k=>Q.wrong.find(x=>x.k==k));
  app.innerHTML=`<div class=card><div class=chr>${r.ch}</div><small>${intr?'とちゅうでおわった あなたの称号は…':'あなたの称号は…'}</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
- <div style="font-size:1.2rem;margin-top:8px">${intr?'ここまで '+Q.n+'問 ・ '+Q.c+'問 正解（'+p+'%）':Q.n+'問中 '+Q.c+'問 正解（'+p+'%）'}</div>${intr?'<small>10問以内でおわったので、とちゅう称号です</small><br>':''}<small>平均 ${avg.toFixed(1)}秒 / 問${Q.hints?' ・ヒント'+Q.hints+'回':''}</small></div>
+ <div style="font-size:1.2rem;margin-top:8px">${intr?'ここまで '+Q.n+'問 ・ '+Q.c+'問 正解（'+p+'%）':Q.n+'問中 '+Q.c+'問 正解（'+p+'%）'}</div>${intr?'<small>10問以内でおわったので、とちゅう称号です</small><br>':''}<small>平均 ${avg.toFixed(1)}秒 / 問</small></div>
  ${seen.length?'<h3>まちがえた問題（多めに出ます）</h3>'+seen.map(x=>`<div class=row><span>${x.a[0]}</span><span>${x.a[S.lang]}</span></div>`).join(''):'<h3>ノーミス！すごい🎊</h3>'}
  <button class=big onclick="start()">もう一回！</button><button class="big alt" onclick="home()">ホームへ</button>`}

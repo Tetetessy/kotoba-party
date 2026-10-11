@@ -110,3 +110,33 @@ h1.hm{font-size:1.75rem;margin:.15em 0 .25em}
 .tbtn.off{opacity:.4;filter:grayscale(1);box-shadow:none}
 .big.sub{padding:9px;font-size:1rem;margin:0 0 8px}
 @media(max-width:340px){.sw select{font-size:.86rem;padding:0 22px 0 9px}.sw::after{right:8px}#app{padding:12px}}
+
+/* v1.05 視認性アップ（少しだけ大きく） */
+body{font-size:17px}
+.sm{font-size:1rem;padding:6px 14px;border-radius:15px}
+.top{font-size:1.2rem}
+.chip{font-size:1.05rem;padding:8px 16px}
+.big{font-size:1.3rem;padding:16px}
+.big.sub{font-size:1.1rem;padding:11px}
+/* ホーム */
+h1.hm{font-size:1.95rem}
+.tip.c{font-size:.9rem;padding:6px 12px}
+.fcap{height:34px}
+.fcap label{font-size:.98rem}
+.fcap .note{font-size:clamp(.66rem,3.3vw,.78rem)}
+.sw select{height:48px;font-size:1.08rem;padding:0 34px 0 12px}
+.sw::after{font-size:1rem}
+.tbtn{height:30px;padding:0 12px;font-size:.88rem}
+/* 問題画面 */
+.card small{font-size:.95rem}
+h2{font-size:1.9rem}
+.opt{font-size:1.22rem;padding:15px 16px}
+.in{font-size:1.25rem}input.in{font-size:1.25rem;padding:14px}
+.tag{font-size:.9rem}
+.hn{font-size:1rem}
+/* ⚙オプション */
+.mask h3{font-size:1.05rem}
+.mask .chip{font-size:1.1rem;padding:9px 18px}
+.mask .vol input{height:44px}.mask .vol b{font-size:1.2rem}
+.mask .card small{font-size:.9rem}
+@media(max-width:340px){.sw select{font-size:.92rem;padding:0 22px 0 9px}.opt{font-size:1.1rem}.big{font-size:1.15rem}}
