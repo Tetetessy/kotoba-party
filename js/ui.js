@@ -74,13 +74,13 @@ function stats(tab){tab=tab||'rec';
   TT.forEach((r,a)=>r.forEach((ns,s)=>ns.forEach((n,k)=>all.push({a,s,k,t:EM[a]+n,c:D.titles[EM[a]+n]||0}))));
   TI.forEach((ns,s)=>ns.forEach((n,k)=>all.push({a:5,s,k,t:EM[5]+n,c:D.titles[EM[5]+n]||0})));
   const own=all.filter(o=>o.c>0),top=own.slice().sort((p,q)=>q.c-p.c)[0],tie=top?own.filter(o=>o.c==top.c).length-1:0,got=own.length;
-  const topH=top?`<button class="card topt" onclick="tpop(${top.a},${top.s},${top.k})"><small>👑 いちばん多い称号（あなたの傾向）</small><div style="font-size:3rem;line-height:1.3">${CH[top.a]}</div><b>${top.t}</b><div><small>×${top.c}回 ・ ${tBand(top.a,top.s)}</small></div>${tie?`<small>同じ回数の称号が、ほか${tie}個あります</small>`:''}</button>`:'<div class=card><small>まだ称号がありません。問題を最後まで解くと、ここに集まります。</small></div>';
+  const topH=top?`<button class="card topt" onclick="tpop(${top.a},${top.s},${top.k})"><small>👑 いちばん多い称号（あなたの傾向）</small><div style="font-size:3rem;line-height:1.3">${chOf(top.a,top.s,top.k)}</div><b>${top.t}</b><div><small>×${top.c}回 ・ ${tBand(top.a,top.s)}</small></div>${tie?`<small>同じ回数の称号が、ほか${tie}個あります</small>`:''}</button>`:'<div class=card><small>まだ称号がありません。問題を最後まで解くと、ここに集まります。</small></div>';
   all.forEach(({a,s,k,t,c})=>{
-   (a==5?cardsI:cards).push(c?`<button class=tc onclick="tpop(${a},${s},${k})"><div style="font-size:2.3rem">${CH[a]}</div><b>${t}</b><small>×${c}</small></button>`
+   (a==5?cardsI:cards).push(c?`<button class=tc onclick="tpop(${a},${s},${k})"><div style="font-size:2.3rem">${chOf(a,s,k)}</div><b>${t}</b><small>×${c}</small></button>`
    :`<div class="tc lock"><div style="font-size:2rem">❓</div><b>？？？</b><small>${lockTxt(a,s)}</small></div>`)});
   body=`${topH}<h3>🏅 称号コレクション ${got} / ${TOTAL}</h3><small>集めた称号をタップすると、もう一度見られます</small><div class=tg style="margin-top:8px">${cards.join('')}</div>
   <h3>💤 とちゅう称号　<small>（10問以内でおわると、もらえるよ）</small></h3><div class=tg>${cardsI.join('')}</div>`}
  app.innerHTML=`<h1>${tab=='rec'?'📊 きろく':'🏅 称号'}</h1><small>👤 ${uname()}${ACC?'':'（この端末のみ）'}</small>${tabs}${body}<button class=big onclick="home()">もどる</button>`}
 const closeM=()=>{modal.innerHTML=''};
 function tpop(a,s,k){const n=tName(a,s,k),c=D.titles[EM[a]+n]||0;
- modal.innerHTML=`<div class=mask onclick="closeM()"><div class="card pop" onclick="event.stopPropagation()"><div class=chr>${CH[a]}</div><small>称号</small><h2>${EM[a]}${n}</h2><div>${tBand(a,s)}</div><small>獲得 ${c} 回</small><button class=big onclick="closeM()">とじる</button></div></div>`;SND.ok()}
+ modal.innerHTML=`<div class=mask onclick="closeM()"><div class="card pop" onclick="event.stopPropagation()"><div class=chr>${chOf(a,s,k)}</div><small>称号</small><h2>${EM[a]}${n}</h2><div>${tBand(a,s)}</div><small>獲得 ${c} 回</small><button class=big onclick="closeM()">とじる</button></div></div>`;SND.ok()}

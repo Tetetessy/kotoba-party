@@ -14,16 +14,19 @@ const TT=[[['ダッシュで全滅隊','ハヤブサ級の迷子'],['言語原�
 [['ひらめき小僧','スピードおしゃべり'],['おしゃべり見習い','旅の相棒'],['コツコツ職人','ていねい旅人']],
 [['光速トランスレーター','電光石火の達人'],['会話の達人','ことばの魔法使い'],['慎重な賢者','落ち着きの哲学者']],
 [['言語の神','神速マスター'],['言語マスター','パーフェクト王'],['ぎりぎり完璧','無双の学者']]];
-const CH=['🦖','🐣','🦊','🦄','🐉','🐢'],AL=['正解率0%','正解率1〜49%','正解率50〜79%','正解率80〜99%','正解率100%'],SL=['平均4秒未満','平均4〜8秒','平均8秒以上'];
+// 称号ごとに、すべて別々のキャラ（全36種。順番は TT の a→s→k、そのあと TI の s→k）
+const CHF=['🐗','🦅','🦖','🦕','🦥','🐘','🐒','🐇','🐣','🐧','🐢','🐌','🦊','🦜','🐤','🐕','🐜','🐈','🐆','🐬','🦄','🦉','🦌','🐼','🐉','🦈','🦁','🐯','🦔','🐻','🦋','🐝','🐾','🐨','🐹','🐞'];
+const chOf=(a,s,k)=>CHF[a==5?30+s*3+k:a*6+s*2+k];
+const AL=['正解率0%','正解率1〜49%','正解率50〜79%','正解率80〜99%','正解率100%'],SL=['平均4秒未満','平均4〜8秒','平均8秒以上'];
 // とちゅう称号: 10問以内でおわったとき（「ひたすら」も含む）。[1〜3問でおわる / 4〜10問でおわる] からランダム
 const TI=[['ふらっと立ち寄り客','ちらっと見学の旅人','おためし一歩さん'],['ひと休み中の冒険者','また来るね名人','のんびり寄り道旅人']],SI=['1〜3問でおわる','4〜10問でおわる'];
 const tName=(a,s,k)=>a==5?TI[s][k]:TT[a][s][k];
 const tBand=(a,s)=>a==5?'とちゅうでおわった ・ '+SI[s]:AL[a]+' ・ '+SL[s];
 const lockTxt=(a,s)=>a==5?'とちゅうでおわる<br>'+SI[s]:AL[a]+'<br>'+SL[s];
 const TOTAL=TT.flat(2).length+TI.flat().length;
-function awardI(n){const s=n<=3?0:1,k=Math.random()*TI[s].length|0,t=EM[5]+TI[s][k],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[5]}}
+function awardI(n){const s=n<=3?0:1,k=Math.random()*TI[s].length|0,t=EM[5]+TI[s][k],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:chOf(5,s,k)}}
 function award(p,avg){const a=p==0?0:p<50?1:p<80?2:p<100?3:4,s=avg<4?0:avg<8?1:2,
- t=EM[a]+TT[a][s][Math.random()*2|0],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:CH[a]}}
+ k=Math.random()*2|0,t=EM[a]+TT[a][s][k],isNew=!D.titles[t];D.titles[t]=(D.titles[t]||0)+1;return{t,isNew,ch:chOf(a,s,k)}}
 
 function start(){Q={n:0,c:0,ms:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
 function pick(){
