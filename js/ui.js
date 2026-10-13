@@ -9,7 +9,10 @@ const KL=()=>[['mix','ミックス'],['w','単語のみ'],['s','文章のみ'],[
 const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10秒'],[15,'15秒']],f)}
 <h3>➡ 解説のあと</h3>${grp('auto',[[0,'手動（つぎへ）'],[1,'自動で進む']],f)}
 <h3>🔥 苦手を多めに出す</h3>${grp('boost',[[1,'ON'],[0,'OFF']],f)}
-<h3>🔊 音量　<small>（0でミュート）</small></h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.vol} style="--f:${S.vol/10}" aria-label=音量 oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10)" onchange="setVol(this.value)"><b>${S.vol}</b></div>`;
+<h3>🔊 音量　<small>（0でミュート）</small></h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.vol} style="--f:${S.vol/10}" aria-label=音量 oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10)" onchange="setVol(this.value)"><b>${S.vol}</b></div>
+<div class=vt><button class=sm onclick="voiceTest()">🔈 読み上げテスト</button><small id=vst class=vst>${typeof voiceInfo=='function'?voiceInfo():''}</small></div>`;
+const SAMPLE=['','Hello','你好','안녕하세요','Hola','Ciao','สวัสดี','Xin chào'];
+function voiceTest(){speak(SAMPLE[S.lang]);const e=document.getElementById('vst');if(e)e.textContent=voiceInfo()}
 
 function optOpen(){clearTimeout(tm);optShow()}
 function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>💌 意見・感想</h3><button class="big alt" onclick="window.open(CFG.formView,'_blank','noopener')">📨 意見箱を開く</button><small><span class=ph>Googleフォームが開きます。</span><span class=ph>送信先は管理者だけに届きます。</span></small>
