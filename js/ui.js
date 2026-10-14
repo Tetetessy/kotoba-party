@@ -4,8 +4,8 @@ const grp=(k,o,f='set',c='chips')=>`<div class=${c}>${o.map(([v,l])=>`<button cl
 const set=(k,v)=>{S[k]=v;save();home()};
 const setO=(k,v)=>{S[k]=v;save();optShow()};
 const setVol=v=>{S.vol=+v;save();SND.ok()};
-// KL: 出題の選択肢（文字・発音は、対応する言語のときだけ出す）
-const KL=()=>[['mix','ミックス'],['w','単語のみ'],['s','文章のみ'],['r','🔁 まちがい復習（'+rev().length+'）'],...(P.some(x=>x.lg==S.lang)?[['b','文字・発音']]:[])],FM=[['mix','ミックス'],['c','4択'],['t','入力']];
+// KL: 出題の選択肢（文字の読み書きは、対応する言語のときだけ出す）
+const KL=()=>[['mix','ミックス'],['w','単語のみ'],['s','文章のみ'],['r','🔁 まちがい復習（'+rev().length+'）'],...(P.some(x=>x.lg==S.lang)?[['b','文字の読み書き']]:[])],FM=[['mix','ミックス'],['c','4択'],['t','入力']],AN=[['tr','翻訳'],['li','聞き取り'],['qa','質疑応答']];
 const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10秒'],[15,'15秒']],f)}
 <h3>➡ 解説のあと</h3>${grp('auto',[[0,'手動（つぎへ）'],[1,'自動で進む']],f)}
 <h3>🔥 苦手を多めに出す</h3>${grp('boost',[[1,'ON'],[0,'OFF']],f)}
@@ -15,7 +15,7 @@ const SAMPLE=['','Hello','你好','안녕하세요','Hola','Ciao','สวัส�
 function voiceTest(){speak(SAMPLE[S.lang]);const e=document.getElementById('vst');if(e)e.textContent=voiceInfo()}
 
 function optOpen(){clearTimeout(tm);optShow()}
-function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>💌 意見・感想</h3><button class="big alt" onclick="window.open(CFG.formView,'_blank','noopener')">📨 意見箱を開く</button><small><span class=ph>Googleフォームが開きます。</span><span class=ph>送信先は管理者だけに届きます。</span></small>
+function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>🔗 友だちに教える</h3><button class="big alt" onclick="copyExt()">📋 LINE用URLをコピー</button><small><span class=ph>貼ると、LINEからでも</span><span class=ph>ブラウザで開いて音が出るよ。</span></small><h3>💌 意見・感想</h3><button class="big alt" onclick="window.open(CFG.formView,'_blank','noopener')">📨 意見箱を開く</button><small><span class=ph>Googleフォームが開きます。</span><span class=ph>送信先は管理者だけに届きます。</span></small>
  <button class=sm onclick="notes()">📝 リリースノート</button>
  <button class=big onclick="optClose()">とじる</button></div></div>`}
 function notes(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">📝 リリースノート</h2>${RN.length?`<table class=rn>${RN.map(r=>`<tr><th><span class=vtag>${r.v}</span><small>${r.date}</small></th><td><ul>${r.items.map(i=>`<li>${i}</li>`).join('')}</ul></td></tr>`).join('')}</table>`:'まだありません'}<button class=big onclick="optShow()">もどる</button></div></div>`}
@@ -27,27 +27,31 @@ const fld=(id,cap,sel,right='')=>`<div class=fld><div class=fcap><label for=${id
 const toast=m=>{const e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2400)};
 const tbtnOff=()=>toast('文字表は、'+ORD.filter(l=>P.some(x=>x.lg==l)).map(l=>LS[l]).join('・')+'で見られるよ');
 function home(){clearTimeout(tm);
+ const qa=S.ans=='qa';
  const hasB=P.some(x=>x.lg==S.lang);
- const lvN=LV.map((l,i)=>i?P.filter(x=>x.t!='b'&&x.l==i&&x.a[S.lang]).length:1); // この言語の、レベルごとの収録数（0なら「準備中」）
+ const lvN=LV.map((l,i)=>i?P.filter(x=>(S.ans=='qa'?x.t=='q':x.t!='b'&&x.t!='q')&&x.l==i&&x.a[S.lang]).length:1); // この言語の、レベルごとの収録数（0なら「準備中」）
  if(S.lvl&&!lvN[S.lvl]){S.lvl=0;save()}
  if(S.kind=='b'&&!hasB){S.kind='mix';save()}
  const none=lvN.map((n,i)=>i&&!n?LV[i][0]:'').join('');
  app.innerHTML=`<div class=top><button class=sm onclick="acct()">👤 ${uname()}</button><button class=sm onclick="optOpen()">⚙</button></div>
  <h1 class=hm><span>🎈</span> ことばパーティ</h1>
- <div class="tip c"><span class=ph>✨ ⚙で</span><span class=ph>時間・音量・</span><span class=ph>意見の送信も</span><span class=ph>できるよ🎵</span></div>
+ ${INAPP?`<div class="tip c" style="background:#fff3cd"><span class=ph>⚠ このアプリ内では</span><span class=ph>音が出ないよ。</span><span class=ph>右上メニューから</span><span class=ph>「ブラウザで開く」を選んでね</span></div>`:''}<div class="tip c"><span class=ph>✨ ⚙で</span><span class=ph>時間・音量・</span><span class=ph>意見の送信も</span><span class=ph>できるよ🎵</span></div>
  <div class=panel>
  ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn${hasB?'':' off'}"${hasB?'':' aria-disabled=true'} onclick="${hasB?'tbl()':'tbtnOff()'}">📖 文字表</button>`)}
+ ${fld('f-kind','📚 出題',selH('f-kind','kind',qa?[['mix','質疑応答の問題']]:KL()))}
  ${fld('f-lvl','🎯 レベル',selH('f-lvl','lvl',LV.map((l,i)=>[i,l+(i&&!lvN[i]?'（準備中）':''),i&&!lvN[i]]),1),none?`<span class=note>※ ${none}は準備中</span>`:'')}
+ ${fld('f-ans','🎓 回答',selH('f-ans','ans',AN))}
  <div class=fgrid>
  ${fld('f-mode','🔢 問題数',selH('f-mode','mode',[[0,'♾ ひたすら'],[10,'10問'],[20,'20問'],[30,'30問']],1))}
- ${fld('f-fmt','✍ 形式',selH('f-fmt','fmt',FM))}
+ ${fld('f-fmt','✍ 形式',selH('f-fmt','fmt',qa?[['c','4択のみ']]:FM))}
  </div>
- ${fld('f-kind','📚 出題',selH('f-kind','kind',KL()))}
  </div>
  <button class=big onclick="start()">スタート！</button><button class="big alt sub" onclick="stats()">📊 きろく・称号</button>
- ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`}
+ ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`;
+ if(qa)['f-fmt','f-kind'].forEach(i=>{document.getElementById(i).disabled=true})}
 
 function tbl(){const x=P.filter(p=>p.lg==S.lang);
+ if(S.lang==3){app.innerHTML=HG.html();window.scrollTo(0,0);return}
  app.innerHTML=`<h1>📖 ${L[S.lang]}の文字表</h1><small>タップすると発音が聞けます</small><div style="text-align:center">${x.map(p=>`<button class=card style="display:inline-block;margin:5px;padding:8px 14px;font:inherit;color:inherit;cursor:pointer" onclick="speak('${p.a[S.lang]}')"><b style="font-size:1.7rem">${p.a[S.lang]}</b><br><small>${p.a[0]}</small></button>`).join('')}</div><button class=big onclick="home()">もどる</button>`}
 function acct(){const e=m=>`<div class=err id=er>${m||''}</div>`;
  app.innerHTML=ACC?`<h1>👤 アカウント</h1><div class=card><small>${ACC}</small><h3>なまえ（12文字まで）</h3>

@@ -19,6 +19,6 @@ async function load(){
  (await j('qa.json').catch(()=>[])).forEach(r=>P.push({k:'q'+r[1],t:'q',l:+r[0],a:r.slice(1,9),ok:r[9],x:r[10]}));
  RN=await j('releases.json').catch(()=>[]);
  const ps=await j('pos.json').catch(()=>({}));Object.entries(ps).forEach(([k,v])=>v.forEach(w=>POS[w]=k)); // ヒント用の品詞
- // 文字・発音の基礎: data/basics.json {"3":[[ハングル,読み]],"2":[[漢字,ピンイン]]}
+ // 文字の読み書きの基礎: data/basics.json {"3":[[ハングル,読み]],"2":[[漢字,ピンイン]]}
  const bs=await j('basics.json').catch(()=>({}));Object.entries(bs).forEach(([g,r])=>r.forEach(([c,rd])=>{const a=[rd];a[g]=c;P.push({k:'b'+g+c,t:'b',l:0,lg:+g,a})}));
 }

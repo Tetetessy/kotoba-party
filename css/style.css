@@ -143,3 +143,12 @@ h2{font-size:1.9rem}
 
 .vt{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin:4px 0 8px}
 .vst{font-size:.85rem;color:var(--sub);line-height:1.5;text-wrap:wrap}
+/* v1.02 ハングル文字表 */
+.hg{text-align:left}.hg h2{margin:0 0 6px;font-size:1.25rem}.hg h3{margin:12px 0 6px}
+.hrow{display:flex;flex-wrap:wrap;gap:6px}
+.hc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:56px;padding:5px 4px;background:var(--card);color:var(--ink);border:2px solid var(--ink);border-radius:12px;font:inherit;cursor:pointer;line-height:1.15}
+.hc b{font-size:1.5rem}.hc i{font-style:normal;font-size:.82rem}.hc em{font-style:normal;font-size:.76rem;color:var(--sub)}.hc small{font-size:.72rem;color:var(--sub)}
+.hgw{width:100%}.hgt{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed}
+.hgt th{font-size:1.15rem;padding:2px 0;text-align:center;line-height:1.1}.hgt th small{font-size:.7rem;font-weight:400;color:var(--sub)}
+.hgt .hc{min-width:0;width:100%;padding:4px 0;border-width:2px;border-radius:9px;overflow-wrap:anywhere}.hgt .hc b{font-size:1.3rem}.hgt .hc i{font-size:.74rem}.hgt .hc em{font-size:.68rem}
+.hgt td{padding:0}
