@@ -51,7 +51,7 @@ function next(){clearTimeout(Q.at);
  const li=S.ans=='li',d=li?true:Math.random()<.5,qi=d?0:S.lang,ai=d?S.lang:0,ans=it.a[ai],txt=S.fmt=='t'||(S.fmt=='mix'&&Math.random()<.5);
  // 聞き取りは、声を聞いて外国語の文字で答える（答えは各言語の単語・文章）
  const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
- Q.cur={it,ans,d,txt,mode:li?'li':'tr',opts:shuf([ans,...ds])};Q.lock=0;draw()}
+ Q.cur={it,ans,d,txt,mode:li?'li':'tr',alang:li||d?S.lang:it.t=='b'?(S.lang==7?7:1):0,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
 function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?'単語':'文章';
  const head=md=='qa'?F[S.lang]+' '+L[S.lang]+'の質疑応答<br>声と文章の質問に、日本語で答えを選ぼう':md=='li'?'🎧 '+F[S.lang]+' '+L[S.lang]+'の聞き取り<br>聞こえた'+kn+'を'+(c.txt?'入力しよう':'選ぼう'):it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字の読み書き<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語';
@@ -59,9 +59,9 @@ function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
  <div class=card id=qc><small>${head} <span class=tag>${c.txt?'入力':'4択'}</span></small>${body}</div>
- ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="'+(md=='li'?'聞こえたことばを入力':'こたえを入力')+'" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button>'
+ ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="'+(md=='li'?'聞こえたことばを入力':'こたえを入力')+'" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button><div id=zc class=zc></div><div id=kbx class=kbd></div><button id=kbt type=button class="sm kt" onclick="kbToggle()"></button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
- const ti=document.getElementById('ti');if(ti&&md!='li')ti.focus();startT();
+ const ti=document.getElementById('ti');if(c.txt)kbMount();if(ti&&md!='li'&&!(S.kb&&c.alang>0))ti.focus();startT();
  if(md!='tr')speak(it.a[S.lang])} // 聞き取り・質疑応答は、出題と同時に自動で読み上げ（ブラウザに止められたら🔊を押す）
 
 function startT(){clearTimeout(tm);Q.t0=Date.now();
@@ -81,7 +81,7 @@ function ans(i,txt){
  Q.n++;save();fx(ok);
  document.getElementById('qc').classList.add(ok?'okc':'ngc');
  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=1;if(c.opts[j]==c.ans)b.classList.add('ok');else if(j==i)b.classList.add('ng')});
- const ti=document.getElementById('ti');if(ti){ti.disabled=1;ti.classList.add(ok?'ok':'ng');ti.nextElementSibling.remove()}
+ const ti=document.getElementById('ti');if(ti){ti.disabled=1;ti.classList.add(ok?'ok':'ng');ti.nextElementSibling.remove();['zc','kbx','kbt'].forEach(i=>{const e=document.getElementById(i);if(e)e.remove()})}
  const last=Q.total&&Q.n>=Q.total;
  document.getElementById('fb').innerHTML=`<div class="card fb"><h2>${ok?'🎉 せいかい！':out?'⏰ 時間切れ！':'💦 おしい！'}</h2>
  <div>${c.mode=='qa'?c.it.a[0]+'<br>'+c.it.a[S.lang]+'<br>答え：'+c.ans:c.it.a[0]+'<br>＝ '+c.it.a[S.lang]} <button class=sm onclick="speak(Q.cur.it.a[S.lang])">👂 発音をきく</button> <button class=sm onclick="speak(Q.cur.it.a[S.lang],0,1)">🐢 ゆっくり</button></div>

@@ -13,7 +13,10 @@ const UA=navigator.userAgent||'',IOS=/iPhone|iPad|iPod/.test(UA)||(/Macintosh/.t
 // 音楽や動画を流したままでも聞こえるよう、「短い音」として鳴らす（対応している端末のみ。マナーモードの影響も受けにくい）
 const INAPP=/Line\/|FBAN|FBAV|FB_IAB|Instagram|MicroMessenger|Twitter|KAKAOTALK|; wv\)/i.test(UA);
 function extURL(){try{return location.origin+location.pathname+'?openExternalBrowser=1'}catch(e){return ''}}
-function copyExt(){const u=extURL(),ok=()=>note('コピーしたよ！LINEに貼ると、ブラウザで開けるよ');try{navigator.clipboard.writeText(u).then(ok,()=>prompt('このURLをコピーしてね',u))}catch(e){prompt('このURLをコピーしてね',u)}}
+function copyExt(){const u=extURL(),ok=()=>note('URLをコピーしたよ！LINEなどに貼って送ってね');try{navigator.clipboard.writeText(u).then(ok,()=>prompt('このURLをコピーしてね',u))}catch(e){prompt('このURLをコピーしてね',u)}}
+function shareApp(){const d={title:'ことばパーティ',text:'無料の外国語学習アプリ「ことばパーティ」で遊ぼう🎈',url:extURL()}; // 端末の共有メニュー（LINE・X・Instagramなど）を開く。非対応ならURLをコピー
+ try{if(navigator.share){navigator.share(d).catch(e=>{if(!e||e.name!='AbortError')copyExt()});return}}catch(e){}
+ copyExt()}
 function audioMode(){try{if(navigator.audioSession&&navigator.audioSession.type!=='transient')navigator.audioSession.type='transient'}catch(e){}}
 let VS=[];const loadV=()=>{try{VS=(SS&&SS.getVoices())||[]}catch(e){}};
 const vl=v=>(v.lang||'').toLowerCase().replace('_','-');

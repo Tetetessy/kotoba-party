@@ -96,6 +96,8 @@ function kbMount(){const ti=document.getElementById('ti'),box=document.getElemen
  const l=Q.cur.alang,on=S.kb&&l>0;KBD.buf='';KBD.shift=0;KBD.rr=0;
  ti.setAttribute('inputmode',on?'none':'text');box.innerHTML=on?kbHTML(l):'';
  const z=document.getElementById('zc');if(z)z.style.display=on&&l==2?'flex':'none';
- const tg=document.getElementById('kbt');if(tg)tg.textContent=on?'⌨ 端末のキーボードを使う':'⌨ 専用キーボードを使う';
+ const tg=document.getElementById('kbt');if(tg)tg.style.display=l>0?'':'none';if(tg)tg.textContent=on?'⌨ 端末のキーボードを使う':'⌨ 専用キーボードを使う';
  if(on&&l==2){zhRender();kbLoadPY()}}
 function kbToggle(){S.kb=S.kb?0:1;save();kbMount();const ti=document.getElementById('ti');if(ti)ti.focus()}
+
+document.addEventListener('click',kbClick);

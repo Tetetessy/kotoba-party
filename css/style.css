@@ -152,3 +152,12 @@ h2{font-size:1.9rem}
 .hgt th{font-size:1.15rem;padding:2px 0;text-align:center;line-height:1.1}.hgt th small{font-size:.7rem;font-weight:400;color:var(--sub)}
 .hgt .hc{min-width:0;width:100%;padding:4px 0;border-width:2px;border-radius:9px;overflow-wrap:anywhere}.hgt .hc b{font-size:1.3rem}.hgt .hc i{font-size:.74rem}.hgt .hc em{font-size:.68rem}
 .hgt td{padding:0}
+.ctt{margin:14px 0 26px}
+.hrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}.hrow.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.hrow.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.hrow.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.hrow .hc{min-width:0;width:100%;overflow-wrap:anywhere}
+/* v1.03 専用キーボード */
+.kbd{display:flex;flex-direction:column;gap:5px;margin:10px 0}.kr{display:flex;gap:4px;justify-content:center}
+.k{flex:1;min-width:0;height:46px;padding:0;font:inherit;font-size:1.15rem;color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:10px;cursor:pointer;touch-action:manipulation}
+.k.kw{flex:4}.k.kd{flex:2}.k.kon{background:var(--y)}.k.zk{flex:none;min-width:44px;padding:0 10px}
+.zc{display:none;flex-wrap:wrap;gap:5px;align-items:center;margin:8px 0}.zb{font-weight:700;padding:2px 8px;border:2px dashed var(--ink);border-radius:8px}
+.kt{display:block;margin:4px auto}
