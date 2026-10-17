@@ -5,7 +5,7 @@ const set=(k,v)=>{S[k]=v;save();home();if(k=='fmt'&&v!='c')toast('入力のと�
 const setO=(k,v)=>{S[k]=v;save();optShow()};
 const setVol=v=>{S.vol=+v;save();SND.ok()};
 // KL: 出題の選択肢（文字の読み書きは、対応する言語のときだけ出す）
-const KL=()=>[['mix','ミックス'],...(P.some(x=>x.lg==S.lang)?[['b','文字の読み書き']]:[]),['w','単語のみ'],['s','文章のみ'],['r','まちがい復習（'+rev().length+'）']],FM=[['mix','ミックス'],['c','4択'],['t','入力']],AN=[['tr','翻訳'],['li','聞き取り'],['qa','質疑応答']];
+const KL=()=>[['mix','ミックス'],...(P.some(x=>x.lg==S.lang)?[['b','文字の読み書き']]:[]),['w','単語のみ'],['s','文章のみ'],['r','まちがい復習（'+rev().length+'）']],FM=[['mix','ミックス'],['c','4択'],['t','入力']],AN=[['tr','翻訳','聞いた言葉を訳そう！'],['li','聞き取り','聞いた言葉をそのまま返そう！'],['qa','質疑応答','質問に対して回答しよう！']];
 const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10秒'],[15,'15秒']],f)}
 <h3>➡ 解説のあと</h3>${grp('auto',[[0,'手動（つぎへ）'],[1,'自動で進む']],f)}
 <h3>🔥 苦手を多めに出す</h3>${grp('boost',[[1,'ON'],[0,'OFF']],f)}
@@ -40,7 +40,9 @@ function home(){clearTimeout(tm);
  ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn${hasB?'':' off'}"${hasB?'':' aria-disabled=true'} onclick="${hasB?'tbl()':'tbtnOff()'}">📖 文字表</button>`)}
  ${fld('f-kind','📚 出題',selH('f-kind','kind',qa?[['mix','質疑応答の問題']]:KL()))}
  ${fld('f-lvl','🎯 レベル',selH('f-lvl','lvl',bk?[[0,'レベルなし（文字には不要）']]:LV.map((l,i)=>[i,l+(i&&!lvN[i]?'（準備中）':''),i&&!lvN[i]]),1),none&&!bk?`<span class=note>※ ${none}は準備中</span>`:'')}
- ${fld('f-ans','🎓 回答',selH('f-ans','ans',AN))}
+
+ ${fld('f-dir','🔄 翻訳',selH('f-dir','dir',S.ans=='tr'?[['mix','ミックス'],['f2j',LS[S.lang]+'⇒日本語'],['j2f','日本語⇒'+LS[S.lang]]]:[['mix','（回答が「翻訳」のときに選べます）']]))}
+ <div class=fld><div class=fcap><label id=f-ans>🎓 回答</label></div><div class=rg role=radiogroup aria-labelledby=f-ans>${AN.map(([v,n,d])=>`<button type=button role=radio aria-checked=${S.ans==v} class="rb${S.ans==v?' on':''}" onclick="set('ans','${v}')"><b>${n}</b><small>（${d}）</small></button>`).join('')}</div></div>
  <div class=fgrid>
  ${fld('f-mode','🔢 問題数',selH('f-mode','mode',[[0,'♾ ひたすら'],[10,'10問'],[20,'20問'],[30,'30問']],1))}
  ${fld('f-fmt','✍ 形式',selH('f-fmt','fmt',qa?[['c','4択のみ']]:FM))}
@@ -49,7 +51,8 @@ function home(){clearTimeout(tm);
  <button class=big onclick="start()">スタート！</button><button class="big alt sub" onclick="stats()">📊 きろく・称号</button>
  ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`;
  if(qa)['f-fmt','f-kind'].forEach(i=>{document.getElementById(i).disabled=true});
- if(bk)document.getElementById('f-lvl').disabled=true}
+ if(bk)document.getElementById('f-lvl').disabled=true;
+ if(S.ans!='tr')document.getElementById('f-dir').disabled=true}
 
 function tbl(){const x=P.filter(p=>p.lg==S.lang);
  const cf={3:HGT.html,2:CT.zh,6:CT.th,7:CT.vi}[S.lang];if(cf){app.innerHTML=cf();window.scrollTo(0,0);return}
@@ -78,17 +81,15 @@ function stats(tab){tab=tab||'rec';
   <h3>😵 苦手ランキング　<small>（言語名をタップで開閉）</small></h3>${wk}
   ${h?'<h3>さいきんの結果</h3>'+h:''}<button class=sm onclick="if(confirm('記録をすべて消しますか？')){resetRec();stats()}">記録をリセット</button>`}
  else{
-  const all=[],cards=[],cardsI=[];
-  TT.forEach((r,a)=>r.forEach((ns,s)=>ns.forEach((n,k)=>all.push({a,s,k,t:EM[a]+n,c:D.titles[EM[a]+n]||0}))));
-  TI.forEach((ns,s)=>ns.forEach((n,k)=>all.push({a:5,s,k,t:EM[5]+n,c:D.titles[EM[5]+n]||0})));
-  const own=all.filter(o=>o.c>0),top=own.slice().sort((p,q)=>q.c-p.c)[0],tie=top?own.filter(o=>o.c==top.c).length-1:0,got=own.length;
-  const topH=top?`<button class="card topt" onclick="tpop(${top.a},${top.s},${top.k})"><small>👑 いちばん多い称号（あなたの傾向）</small><div style="font-size:3rem;line-height:1.3">${chOf(top.a,top.s,top.k)}</div><b>${top.t}</b><div><small>×${top.c}回 ・ ${tBand(top.a,top.s)}</small></div>${tie?`<small>同じ回数の称号が、ほか${tie}個あります</small>`:''}</button>`:'<div class=card><small>まだ称号がありません。問題を最後まで解くと、ここに集まります。</small></div>';
-  all.forEach(({a,s,k,t,c})=>{
-   (a==5?cardsI:cards).push(c?`<button class=tc onclick="tpop(${a},${s},${k})"><div style="font-size:2.3rem">${chOf(a,s,k)}</div><b>${t}</b><small>×${c}</small></button>`
-   :`<div class="tc lock"><div style="font-size:2rem">❓</div><b>？？？</b><small>${lockTxt(a,s)}</small></div>`)});
+  const all=TL.map((o,i)=>({i,o,t:o.n,c:D.titles[o.n]||0})),cards=[],cardsI=[];
+  const own=all.filter(x=>x.c>0),top=own.slice().sort((p,q)=>q.c-p.c)[0],tie=top?own.filter(o=>o.c==top.c).length-1:0,got=own.length;
+  const topH=top?`<button class="card topt" onclick="tpop(${top.i})"><small>👑 いちばん多い称号（あなたの傾向）</small><div style="font-size:3rem;line-height:1.3">${top.o.e}</div><b>${top.t}</b><div><small>×${top.c}回</small></div><small>${tCond(top.o)}</small>${tie?`<br><small>同じ回数の称号が、ほか${tie}個あります</small>`:''}</button>`:'<div class=card><small>まだ称号がありません。問題を最後まで解くと、ここに集まります。</small></div>';
+  all.forEach(({i,o,t,c})=>{
+   (o.q?cardsI:cards).push(c?`<button class=tc onclick="tpop(${i})"><div style="font-size:2.3rem">${o.e}</div><b>${t}</b><small>×${c}</small></button>`
+   :`<div class="tc lock"><div style="font-size:2rem">❓</div><b>？？？</b><small>${tCond(o).replace(/・/g,'<br>')}</small></div>`)});
   body=`${topH}<h3>🏅 称号コレクション ${got} / ${TOTAL}</h3><small>集めた称号をタップすると、もう一度見られます</small><div class=tg style="margin-top:8px">${cards.join('')}</div>
-  <h3>💤 とちゅう称号　<small>（10問以内でおわると、もらえるよ）</small></h3><div class=tg>${cardsI.join('')}</div>`}
+  <h3>🏳️ リタイア称号　<small>（10問以内でおわると、もらえるよ）</small></h3><div class=tg>${cardsI.join('')}</div>`}
  app.innerHTML=`<h1>${tab=='rec'?'📊 きろく':'🏅 称号'}</h1><small>👤 ${uname()}${ACC?'':'（この端末のみ）'}</small>${tabs}${body}<button class=big onclick="home()">もどる</button>`}
 const closeM=()=>{modal.innerHTML=''};
-function tpop(a,s,k){const n=tName(a,s,k),c=D.titles[EM[a]+n]||0;
- modal.innerHTML=`<div class=mask onclick="closeM()"><div class="card pop" onclick="event.stopPropagation()"><div class=chr>${chOf(a,s,k)}</div><small>称号</small><h2>${EM[a]}${n}</h2><div>${tBand(a,s)}</div><small>獲得 ${c} 回</small><button class=big onclick="closeM()">とじる</button></div></div>`;SND.ok()}
+function tpop(i){const o=TL[i],c=D.titles[o.n]||0;
+ modal.innerHTML=`<div class=mask onclick="closeM()"><div class="card pop" onclick="event.stopPropagation()"><div class=chr>${o.e}</div><small>称号</small><h2>${o.n}</h2><div>${tCond(o)}</div><small>獲得 ${c} 回</small><button class=big onclick="closeM()">とじる</button></div></div>`;SND.ok()}
