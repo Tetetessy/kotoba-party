@@ -1,7 +1,7 @@
 // 保存・アカウント（この端末のlocalStorageに保存。サーバー不要・無料）
 const ls={get(k,d){try{return JSON.parse(localStorage.getItem('kp.'+k))||d}catch(e){return d}},set(k,v){try{localStorage.setItem('kp.'+k,JSON.stringify(v))}catch(e){}}};
 const blank=()=>({items:{},tot:{},hist:[],titles:{}});
-let S={lang:1,lvl:0,kind:'mix',fmt:'mix',ans:'tr',dir:'mix',kb:1,mode:0,time:0,auto:0,snd:1,vol:10,boost:1,...ls.get('set',{})};
+let S={lang:1,lvl:0,grp:0,kind:'mix',fmt:'mix',ans:'tr',dir:'mix',kb:1,mode:0,time:0,auto:0,snd:1,vol:10,boost:1,...ls.get('set',{})};
 if(ls.get('set',{}).vol===undefined&&S.snd===0)S.vol=0;
 if(!ls.get('vol2',0)){ls.set('vol2',1);if(S.vol>0)S.vol=10} // 音量を引き上げた版: 初回だけ最大に（⚙でいつでも下げられる）
 let AC=ls.get('acc',{}),ACC=ls.get('cur',null),D;

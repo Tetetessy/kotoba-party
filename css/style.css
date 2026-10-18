@@ -164,3 +164,11 @@ h2{font-size:1.9rem}
 /* v1.03 回答の選択（説明つき） */
 .rg{display:grid;gap:8px}.rb{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:8px 14px;font:inherit;color:var(--ink);background:var(--card);border:3px solid var(--ink);border-radius:14px;cursor:pointer}
 .rb b{font-size:1.15rem}.rb small{color:var(--sub);font-size:.9rem}.rb.on{background:var(--y);box-shadow:0 3px 0 var(--ink)}.rb.on small{color:var(--ink)}
+
+/* v1.03 ホーム：翻訳の3択（横並び）と文字バランス */
+.rg.r3{grid-template-columns:repeat(3,1fr);gap:6px}
+.rg.r3 .rb{align-items:center;text-align:center;padding:7px 2px;gap:0;min-width:0}
+.rg.r3 .rb b{font-size:clamp(.82rem,3.7vw,1rem);line-height:1.3;white-space:nowrap;font-weight:700}
+.rg.r3.dis .rb{opacity:.45;cursor:not-allowed}
+.rb b{font-size:1.05rem}.rb small{font-size:.85rem}
+.sw select{font-size:1.05rem}

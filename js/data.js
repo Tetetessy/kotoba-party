@@ -20,5 +20,8 @@ async function load(){
  RN=await j('releases.json').catch(()=>[]);
  const ps=await j('pos.json').catch(()=>({}));Object.entries(ps).forEach(([k,v])=>v.forEach(w=>POS[w]=k)); // ヒント用の品詞
  // 文字の読み書きの基礎: data/basics.json {"3":[[ハングル,読み]],"2":[[漢字,ピンイン]]}
- const bs=await j('basics.json').catch(()=>({}));Object.entries(bs).forEach(([g,r])=>r.forEach(([c,rd])=>{const a=[rd];a[g]=c;P.push({k:'b'+g+c,t:'b',l:0,lg:+g,a})}));
+ const bs=await j('basics.json').catch(()=>({}));Object.entries(bs).forEach(([g,r])=>r.forEach(([c,rd,gr])=>{const a=[rd];a[g]=c;P.push({k:'b'+g+c,t:'b',l:0,lg:+g,g:gr||1,a})}));
 }
+
+// 文字の読み書きの種類（basics.json の3番目の数字）
+const GR={3:['母音','子音','子音＋母音','パッチム'],2:['母音','よく使う漢字'],6:['子音','母音','数字','声調記号'],7:['声調','母音','子音']};

@@ -64,7 +64,7 @@ function pick(){
   const w=pool.map(x=>S.boost?1+((D.items[S.lang+x.k]||{}).s||0)*2:1);let r=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<pool.length-1&&(r-=w[i])>0)i++;return pool[i]}
  let t=S.kind=='mix'?(Math.random()<Q.p?'s':'w'):S.kind;
  if(t=='b'&&!P.some(x=>x.lg==S.lang))t='w';
- let pool=P.filter(x=>x.t==t&&okx(x)&&(t=='b'||!S.lvl||x.l==S.lvl));if(!pool.length)pool=P.filter(x=>okx(x)&&x.t!='b'&&x.t!='q');
+ let pool=P.filter(x=>x.t==t&&okx(x)&&(t=='b'?(!S.grp||x.g==S.grp):(!S.lvl||x.l==S.lvl)));if(!pool.length)pool=P.filter(x=>okx(x)&&x.t!='b'&&x.t!='q');
  if(S.kind=='r'){const r=rev();if(r.length)pool=r}
  const f=pool.filter(x=>!Q.rc.includes(x.k));if(f.length>3)pool=f;
  const w=pool.map(x=>S.boost?1+((D.items[S.lang+x.k]||{}).s||0)*2:1); // 間違えた問題ほど出やすい
@@ -77,7 +77,8 @@ function next(){clearTimeout(Q.at);
  if(S.ans=='qa'){const ok=it.ok[Math.random()*it.ok.length|0];Q.cur={it,ans:ok,d:0,txt:0,mode:'qa',opts:shuf([ok,...shuf(it.x).slice(0,3)])};Q.lock=0;return draw()}
  const li=S.ans=='li',d=li?true:S.dir=='j2f'?true:S.dir=='f2j'?false:Math.random()<.5,qi=d?0:S.lang,ai=d?S.lang:0,ans=it.a[ai],txt=S.fmt=='t'||(S.fmt=='mix'&&Math.random()<.5);
  // 聞き取りは、声を聞いて外国語の文字で答える（答えは各言語の単語・文章）
- const ds=shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
+ const ds0=a=>shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)&&a(x)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
+ let ds=it.t=='b'?ds0(x=>x.g==it.g):[];if(ds.length<3)ds=ds0(()=>true); // 文字は、同じ種類から選択肢を作る
  Q.cur={it,ans,d,txt,mode:li?'li':'tr',alang:li||d?S.lang:it.t=='b'?(S.lang==7?7:1):0,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
 function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?'単語':'文章';

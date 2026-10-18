@@ -1,7 +1,7 @@
 // 画面: ホーム / オプション / アカウント / きろく
 const app=document.getElementById('app'),modal=document.getElementById('modal');
 const grp=(k,o,f='set',c='chips')=>`<div class=${c}>${o.map(([v,l])=>`<button class="chip ${S[k]===v?'on':''}" onclick="${f}('${k}',${JSON.stringify(v).replace(/"/g,"'")})">${l}</button>`).join('')}</div>`;
-const set=(k,v)=>{S[k]=v;save();home();if(k=='fmt'&&v!='c')toast('入力のときは、外国語の答えに専用キーボードが出るよ（⌨で端末のキーボードに切り替えもOK）')};
+const set=(k,v)=>{S[k]=v;if(k=='lang')S.grp=0;save();home();if(k=='fmt'&&v!='c')toast('入力のときは、外国語の答えに専用キーボードが出るよ（⌨で端末のキーボードに切り替えもOK）')};
 const setO=(k,v)=>{S[k]=v;save();optShow()};
 const setVol=v=>{S.vol=+v;save();SND.ok()};
 // KL: 出題の選択肢（文字の読み書きは、対応する言語のときだけ出す）
@@ -27,10 +27,11 @@ const fld=(id,cap,sel,right='')=>`<div class=fld><div class=fcap><label for=${id
 const toast=m=>{const e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2400)};
 const tbtnOff=()=>toast('文字表は、'+ORD.filter(l=>P.some(x=>x.lg==l)).map(l=>LS[l]).join('・')+'で見られるよ');
 function home(){clearTimeout(tm);
- const qa=S.ans=='qa',bk=!qa&&S.kind=='b'&&P.some(x=>x.lg==S.lang); // 文字の読み書きはレベルがないので、レベルは選べない
+ const qa=S.ans=='qa',bk=!qa&&S.kind=='b'&&P.some(x=>x.lg==S.lang); // 文字の読み書きは、レベルの代わりに「文字の種類」を選ぶ
  const hasB=P.some(x=>x.lg==S.lang);
  const lvN=LV.map((l,i)=>i?P.filter(x=>(S.ans=='qa'?x.t=='q':x.t!='b'&&x.t!='q')&&x.l==i&&x.a[S.lang]).length:1); // この言語の、レベルごとの収録数（0なら「準備中」）
  if(S.lvl&&!lvN[S.lvl]){S.lvl=0;save()}
+ if(S.grp>(GR[S.lang]||[]).length){S.grp=0;save()}
  if(S.kind=='b'&&!hasB){S.kind='mix';save()}
  const none=lvN.map((n,i)=>i&&!n?LV[i][0]:'').join('');
  app.innerHTML=`<div class=top><button class=sm onclick="acct()">👤 ${uname()}</button><button class=sm onclick="optOpen()">⚙</button></div>
@@ -39,10 +40,10 @@ function home(){clearTimeout(tm);
  <div class=panel>
  ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn${hasB?'':' off'}"${hasB?'':' aria-disabled=true'} onclick="${hasB?'tbl()':'tbtnOff()'}">📖 文字表</button>`)}
  ${fld('f-kind','📚 出題',selH('f-kind','kind',qa?[['mix','質疑応答の問題']]:KL()))}
- ${fld('f-lvl','🎯 レベル',selH('f-lvl','lvl',bk?[[0,'レベルなし（文字には不要）']]:LV.map((l,i)=>[i,l+(i&&!lvN[i]?'（準備中）':''),i&&!lvN[i]]),1),none&&!bk?`<span class=note>※ ${none}は準備中</span>`:'')}
-
- ${fld('f-dir','🔄 翻訳',selH('f-dir','dir',S.ans=='tr'?[['mix','ミックス'],['f2j',LS[S.lang]+'⇒日本語'],['j2f','日本語⇒'+LS[S.lang]]]:[['mix','（回答が「翻訳」のときに選べます）']]))}
+ ${bk?fld('f-lvl','🔤 文字の種類',selH('f-lvl','grp',[[0,'すべて'],...(GR[S.lang]||[]).map((n,i)=>[i+1,n])],1)):fld('f-lvl','🎯 レベル',selH('f-lvl','lvl',LV.map((l,i)=>[i,l+(i&&!lvN[i]?'（準備中）':''),i&&!lvN[i]]),1),none?`<span class=note>※ ${none}は準備中</span>`:'')}
  <div class=fld><div class=fcap><label id=f-ans>🎓 回答</label></div><div class=rg role=radiogroup aria-labelledby=f-ans>${AN.map(([v,n,d])=>`<button type=button role=radio aria-checked=${S.ans==v} class="rb${S.ans==v?' on':''}" onclick="set('ans','${v}')"><b>${n}</b><small>（${d}）</small></button>`).join('')}</div></div>
+<div class=fld><div class=fcap><label id=f-dir>🔄 翻訳</label>${S.ans!='tr'?'<span class=note>※ 回答が「翻訳」のとき選べます</span>':''}</div><div class="rg r3${S.ans!='tr'?' dis':''}" role=radiogroup aria-labelledby=f-dir>${(bk?[['mix','ミックス','ランダム'],['f2j','文字','⇒ローマ字'],['j2f','ローマ字','⇒文字']]:[['mix','ミックス','ランダム'],['f2j',LS[S.lang],'⇒日本語'],['j2f','日本語','⇒'+LS[S.lang]]]).map(([v,a,b])=>`<button type=button role=radio aria-checked=${S.dir==v} ${S.ans!='tr'?'disabled ':''}class="rb${S.dir==v?' on':''}" onclick="set('dir','${v}')"><b>${a}</b><b>${b}</b></button>`).join('')}</div></div>
+
  <div class=fgrid>
  ${fld('f-mode','🔢 問題数',selH('f-mode','mode',[[0,'♾ ひたすら'],[10,'10問'],[20,'20問'],[30,'30問']],1))}
  ${fld('f-fmt','✍ 形式',selH('f-fmt','fmt',qa?[['c','4択のみ']]:FM))}
@@ -50,9 +51,7 @@ function home(){clearTimeout(tm);
  </div>
  <button class=big onclick="start()">スタート！</button><button class="big alt sub" onclick="stats()">📊 きろく・称号</button>
  ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`;
- if(qa)['f-fmt','f-kind'].forEach(i=>{document.getElementById(i).disabled=true});
- if(bk)document.getElementById('f-lvl').disabled=true;
- if(S.ans!='tr')document.getElementById('f-dir').disabled=true}
+ if(qa)['f-fmt','f-kind'].forEach(i=>{document.getElementById(i).disabled=true});}
 
 function tbl(){const x=P.filter(p=>p.lg==S.lang);
  const cf={3:HGT.html,2:CT.zh,6:CT.th,7:CT.vi}[S.lang];if(cf){app.innerHTML=cf();window.scrollTo(0,0);return}
