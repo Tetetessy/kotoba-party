@@ -79,20 +79,20 @@
 ]},
 {"level": 4,
 "tpl": [
-["{}をください", "{}, please.", "请给我{}。", "{} 주세요.", "{}, por favor."]
+["{}をください", "{}, please.", "请给我{}。", "{} 주세요.", "{}, por favor.", "{}, per favore.", "ขอ{}ค่ะ", "Cho tôi {}."]
 ],
 "noun": [
-["コーヒー", "Coffee", "咖啡", "커피", "Un café"],
-["お茶", "Tea", "茶", "차", "Un té"],
-["ビール", "Beer", "啤酒", "맥주", "Una cerveza"],
-["ジュース", "Juice", "果汁", "주스", "Un zumo"],
-["牛乳", "Milk", "牛奶", "우유", "Leche"],
-["パン", "Bread", "面包", "빵", "Pan"],
-["サラダ", "Salad", "沙拉", "샐러드", "Una ensalada"],
-["スープ", "Soup", "汤", "수프", "Una sopa"],
-["ステーキ", "Steak", "牛排", "스테이크", "Un filete"],
-["アイスクリーム", "Ice cream", "冰淇淋", "아이스크림", "Un helado"],
-["ケーキ", "Cake", "蛋糕", "케이크", "Una tarta"]
+["コーヒー", "Coffee", "咖啡", "커피", "Un café", "Un caffè", "กาแฟ", "cà phê"],
+["お茶", "Tea", "茶", "차", "Un té", "Un tè", "ชา", "trà"],
+["ビール", "Beer", "啤酒", "맥주", "Una cerveza", "Una birra", "เบียร์", "bia"],
+["ジュース", "Juice", "果汁", "주스", "Un zumo", "Un succo di frutta", "น้ำผลไม้", "nước ép"],
+["牛乳", "Milk", "牛奶", "우유", "Leche", "Del latte", "นม", "sữa"],
+["パン", "Bread", "面包", "빵", "Pan", "Del pane", "ขนมปัง", "bánh mì"],
+["サラダ", "Salad", "沙拉", "샐러드", "Una ensalada", "Un'insalata", "สลัด", "salad"],
+["スープ", "Soup", "汤", "수프", "Una sopa", "Una zuppa", "ซุป", "súp"],
+["ステーキ", "Steak", "牛排", "스테이크", "Un filete", "Una bistecca", "สเต็ก", "bít tết"],
+["アイスクリーム", "Ice cream", "冰淇淋", "아이스크림", "Un helado", "Un gelato", "ไอศกรีม", "kem"],
+["ケーキ", "Cake", "蛋糕", "케이크", "Una tarta", "Una torta", "เค้ก", "bánh ngọt"]
 ]},
 {"level": 3,
 "tpl": [

@@ -3,19 +3,22 @@ const app=document.getElementById('app'),modal=document.getElementById('modal');
 const grp=(k,o,f='set',c='chips')=>`<div class=${c}>${o.map(([v,l])=>`<button class="chip ${S[k]===v?'on':''}" onclick="${f}('${k}',${JSON.stringify(v).replace(/"/g,"'")})">${l}</button>`).join('')}</div>`;
 const set=(k,v)=>{S[k]=v;if(k=='lang')S.grp=0;save();home();if(k=='fmt'&&v!='c')toast('入力のときは、外国語の答えに専用キーボードが出るよ（⌨で端末のキーボードに切り替えもOK）')};
 const setO=(k,v)=>{S[k]=v;save();optShow()};
-const setVol=v=>{S.vol=+v;save();SND.ok()};
+const setVol=(k,v)=>{S[k]=+v;save();if(k=='bgm'||k=='vol')BGM.vol();if(k=='se'||k=='vol')SND.ok();if(k=='voi')speak(SAMPLE[S.lang]||'Hello')};
 // KL: 出題の選択肢（文字の読み書きは、対応する言語のときだけ出す）
 const KL=()=>[['mix','ミックス'],...(P.some(x=>x.lg==S.lang)?[['b','文字の読み書き']]:[]),['w','単語のみ'],['s','文章のみ'],['r','まちがい復習（'+rev().length+'）']],FM=[['mix','ミックス'],['c','4択'],['t','入力']],AN=[['tr','翻訳','聞いた言葉を訳そう！'],['li','聞き取り','聞いた言葉をそのまま返そう！'],['qa','質疑応答','質問に対して回答しよう！']];
 const optsHTML=f=>`<h3>⏱ 制限時間</h3>${grp('time',[[0,'なし'],[10,'10秒'],[15,'15秒']],f)}
 <h3>➡ 解説のあと</h3>${grp('auto',[[0,'手動（つぎへ）'],[1,'自動で進む']],f)}
 <h3>🔥 苦手を多めに出す</h3>${grp('boost',[[1,'ON'],[0,'OFF']],f)}
-<h3>🔊 音量　<small>（0でミュート）</small></h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.vol} style="--f:${S.vol/10}" aria-label=音量 oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10)" onchange="setVol(this.value)"><b>${S.vol}</b></div>
+<h3>🔊 全体の音量　<small>（0でミュート）</small></h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.vol} style="--f:${S.vol/10}" aria-label="🔊 全体の音量　<small>（0でミュート）</small>" oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10);BGM.vol&&(S.vol=+this.value,BGM.vol())" onchange="setVol('vol',this.value)"><b>${S.vol}</b></div>
+<h3>🎵 BGM</h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.bgm} style="--f:${S.bgm/10}" aria-label="🎵 BGM" oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10);BGM.vol&&(S.bgm=+this.value,BGM.vol())" onchange="setVol('bgm',this.value)"><b>${S.bgm}</b></div>
+<h3>🔔 効果音（SE）</h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.se} style="--f:${S.se/10}" aria-label="🔔 効果音（SE）" oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10);BGM.vol&&(S.se=+this.value,BGM.vol())" onchange="setVol('se',this.value)"><b>${S.se}</b></div>
+<h3>🗣 読み上げ（Voice）</h3><div class=vol><input type=range min=0 max=10 step=1 value=${S.voi} style="--f:${S.voi/10}" aria-label="🗣 読み上げ（Voice）" oninput="this.nextElementSibling.textContent=this.value;this.style.setProperty('--f',this.value/10);BGM.vol&&(S.voi=+this.value,BGM.vol())" onchange="setVol('voi',this.value)"><b>${S.voi}</b></div>
 <div class=vt><button class=sm onclick="voiceTest()">🔈 読み上げテスト</button><small id=vst class=vst>${typeof voiceInfo=='function'?voiceInfo():''}</small></div>`;
 const SAMPLE=['','Hello','你好','안녕하세요','Hola','Ciao','สวัสดี','Xin chào'];
 function voiceTest(){speak(SAMPLE[S.lang]);const e=document.getElementById('vst');if(e)e.textContent=voiceInfo()}
 
 function optOpen(){clearTimeout(tm);optShow()}
-function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>🔗 友だちに共有</h3><button class="big alt" onclick="shareApp()">📤 友だちに共有</button><small><span class=ph>LINE・Xなど、好きなアプリで</span><span class=ph>送れます。開かないときは</span><span class=ph>URLをコピーします。</span></small><h3>💌 意見・感想</h3><button class="big alt" onclick="window.open(CFG.formView,'_blank','noopener')">📨 意見箱を開く</button><small><span class=ph>Googleフォームが開きます。</span><span class=ph>送信先は管理者だけに届きます。</span></small>
+function optShow(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">⚙ オプション</h2>${optsHTML('setO')}<h3>🔗 友だちに共有</h3><button class="big alt" onclick="shareApp()">📤 友だちに共有</button><small><span class=ph>LINE・Xなど、好きなアプリで</span><span class=ph>送れます。開かないときは</span><span class=ph>URLをコピーします。</span></small>${document.getElementById('qc')?'':'<h3>🎈 タイトル画面</h3><button class="big alt" onclick="optClose();showTitle()">🎈 タイトル画面にもどる</button>'}<h3>💌 意見・感想</h3><button class="big alt" onclick="window.open(CFG.formView,'_blank','noopener')">📨 意見箱を開く</button><small><span class=ph>Googleフォームが開きます。</span><span class=ph>送信先は管理者だけに届きます。</span></small>
  <button class=sm onclick="notes()">📝 リリースノート</button>
  <button class=big onclick="optClose()">とじる</button></div></div>`}
 function notes(){modal.innerHTML=`<div class=mask><div class=card><h2 style="margin:0">📝 リリースノート</h2>${RN.length?`<table class=rn>${RN.map(r=>`<tr><th><span class=vtag>${r.v}</span><small>${r.date}</small></th><td><ul>${r.items.map(i=>`<li>${i}</li>`).join('')}</ul></td></tr>`).join('')}</table>`:'まだありません'}<button class=big onclick="optShow()">もどる</button></div></div>`}
@@ -26,7 +29,7 @@ const selH=(id,k,o,num)=>`<span class=sw><select id=${id} onchange="set('${k}',$
 const fld=(id,cap,sel,right='')=>`<div class=fld><div class=fcap><label for=${id}>${cap}</label>${right}</div>${sel}</div>`;
 const toast=m=>{const e=document.createElement('div');e.className='toast';e.setAttribute('role','status');e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2400)};
 const tbtnOff=()=>toast('文字表は、'+ORD.filter(l=>P.some(x=>x.lg==l)).map(l=>LS[l]).join('・')+'で見られるよ');
-function home(){clearTimeout(tm);
+function home(){clearTimeout(tm);qclear();rclear();try{document.getElementById('rfx')&&document.getElementById('rfx').remove()}catch(e){}
  const qa=S.ans=='qa',bk=!qa&&S.kind=='b'&&P.some(x=>x.lg==S.lang); // 文字の読み書きは、レベルの代わりに「文字の種類」を選ぶ
  const hasB=P.some(x=>x.lg==S.lang);
  const lvN=LV.map((l,i)=>i?P.filter(x=>(S.ans=='qa'?x.t=='q':x.t!='b'&&x.t!='q')&&x.l==i&&x.a[S.lang]).length:1); // この言語の、レベルごとの収録数（0なら「準備中」）
@@ -38,7 +41,7 @@ function home(){clearTimeout(tm);
  <h1 class=hm><span>🎈</span> ことばパーティ</h1>
  ${INAPP?`<div class="tip c" style="background:#fff3cd"><span class=ph>⚠ このアプリ内では</span><span class=ph>音が出ないよ。</span><span class=ph>右上メニューから</span><span class=ph>「ブラウザで開く」を選んでね</span></div>`:''}<div class="tip c"><span class=ph>✨ ⚙で</span><span class=ph>時間・音量・</span><span class=ph>意見の送信も</span><span class=ph>できるよ🎵</span></div>
  <div class=panel>
- ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn${hasB?'':' off'}"${hasB?'':' aria-disabled=true'} onclick="${hasB?'tbl()':'tbtnOff()'}">📖 文字表</button>`)}
+ ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn" onclick="tbl()">📖 文字表</button>`)}
  ${fld('f-kind','📚 出題',selH('f-kind','kind',qa?[['mix','質疑応答の問題']]:KL()))}
  ${bk?fld('f-lvl','🔤 文字の種類',selH('f-lvl','grp',[[0,'すべて'],...(GR[S.lang]||[]).map((n,i)=>[i+1,n])],1)):fld('f-lvl','🎯 レベル',selH('f-lvl','lvl',LV.map((l,i)=>[i,l+(i&&!lvN[i]?'（準備中）':''),i&&!lvN[i]]),1),none?`<span class=note>※ ${none}は準備中</span>`:'')}
  <div class=fld><div class=fcap><label id=f-ans>🎓 回答</label></div><div class=rg role=radiogroup aria-labelledby=f-ans>${AN.map(([v,n,d])=>`<button type=button role=radio aria-checked=${S.ans==v} class="rb${S.ans==v?' on':''}" onclick="set('ans','${v}')"><b>${n}</b><small>（${d}）</small></button>`).join('')}</div></div>
@@ -53,9 +56,19 @@ function home(){clearTimeout(tm);
  ${TB?'<small>例文の一部: <a href="https://tatoeba.org" target=_blank rel=noopener>Tatoeba</a>（CC BY 2.0 FR）</small>':''}`;
  if(qa)['f-fmt','f-kind'].forEach(i=>{document.getElementById(i).disabled=true});}
 
-function tbl(){const x=P.filter(p=>p.lg==S.lang);
- const cf={3:HGT.html,2:CT.zh,6:CT.th,7:CT.vi}[S.lang];if(cf){app.innerHTML=cf();window.scrollTo(0,0);return}
- app.innerHTML=`<h1>📖 ${L[S.lang]}の文字表</h1><small>タップすると発音が聞けます</small><div style="text-align:center">${x.map(p=>`<button class=card style="display:inline-block;margin:5px;padding:8px 14px;font:inherit;color:inherit;cursor:pointer" onclick="speak('${p.a[S.lang]}')"><b style="font-size:1.7rem">${p.a[S.lang]}</b><br><small>${p.a[0]}</small></button>`).join('')}</div><button class=big onclick="home()">もどる</button>`}
+function tbl(tab){const cf={3:HGT.html,2:CT.zh,6:CT.th,7:CT.vi,1:CT.en,4:CT.es,5:CT.it}[S.lang],hc=!!cf;
+ tab=hc&&tab!='w'?'c':'w';
+ const tabs=`<div class=ttabs>${hc?`<button class="chip${tab=='c'?' on':''}" onclick="tbl('c')">🔤 文字</button>`:''}<button class="chip${tab=='w'?' on':''}" onclick="tbl('w')">💬 基本単語</button></div>`;
+ app.innerHTML=tabs+(tab=='c'?cf():BWHTML());window.scrollTo(0,0)}
+// 基本単語の表（人・疑問・動詞など）。タップで読み上げ。表記の下の小さい字は日本語、上は読み（中国語・韓国語・タイ語）
+function BWHTML(){const l=S.lang,rd=({2:8,3:9,6:10})[l];
+ const chip=w=>`<button class=hc onclick="speak('${w[l].replace(/'/g,"\\'")}')">${rd?`<small>${w[rd]}</small>`:''}<b${w[l].length>9?' class=lg':''}>${w[l]}</b><i>${w[0]}</i></button>`;
+ return `<h1 class=ctt><span class=ph>💬 ${LS[l]}の</span><span class=ph>基本単語</span></h1><small><span class=ph>タップすると発音が聞けます。</span><span class=ph>下の小さな文字は日本語です。</span></small>`
+ +BW.map((c,i)=>`<div class="card hg"><h2>${'①②③④⑤⑥⑦'[i]||''} ${c.t}（${c.w.length}）</h2><div class="hrow g3 bw">${c.w.map(chip).join('')}</div></div>`).join('')+PTHTML()+'<button class=big onclick="home()">もどる</button>'}
+// 助詞の表: 既存の例文の中で、どの助詞が使われているかを［ ］で示す。訳は選んだ言語で表示
+function PTHTML(){if(!PT)return '';const l=S.lang;
+ const ex=(p,ja,i)=>{const r=P.find(x=>x.t=='s'&&x.a[0]==ja);if(!r||!r.a[l])return '';const k=ja.slice(0,i)+'['+p+']'+ja.slice(i+1);return `<button class=hc onclick="speak('${r.a[l].replace(/'/g,"\\'")}')"><small>${k}</small><b${r.a[l].length>26?' class=lg':''}>${r.a[l]}</b></button>`};
+ return `<div class="card hg"><h2>助詞（文の中での使い方）</h2><small>［ ］の部分が、その助詞です。タップすると発音が聞けます。</small>`+Object.entries(PT).map(([p,list])=>`<h3>「${p}」</h3><div class="hrow g3 bw">${list.map(([ja,i])=>ex(p,ja,i)).join('')}</div>`).join('')+'</div>'}
 function acct(){const e=m=>`<div class=err id=er>${m||''}</div>`;
  app.innerHTML=ACC?`<h1>👤 アカウント</h1><div class=card><small>${ACC}</small><h3>なまえ（12文字まで）</h3>
  <input id=nm class=in value="${AC[ACC].name}"><button class="big m" onclick="rename(nm.value);acct()">なまえを変更</button></div>

@@ -3,6 +3,7 @@
 import json,os,sys
 D=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),'data')
 lv=len(json.load(open(D+'/meta.json',encoding='utf-8'))['levels']);bad=0
+EX=json.load(open(D+'/extra.json',encoding='utf-8'))
 for f in('words','sentences'):
     seen=set()
     for i,r in enumerate(json.load(open(f'{D}/{f}.json',encoding='utf-8')),2):
@@ -11,6 +12,7 @@ for f in('words','sentences'):
         elif not r[0].isdigit() or not 1<=int(r[0])<=lv:e.append('レベル番号が不正')
         elif not all(x.strip() for x in r):e.append('空の項目')
         elif r[1] in seen:e.append('日本語が重複')
+        if not e and not all(EX.get(k,{}).get(r[1]) for k in('it','th','vi')):e.append('イタリア語・タイ語・ベトナム語のいずれかの訳がない（extra.json）')
         if e:bad+=1;print(f'{f}.json {i}行目:',e[0],r[:2])
         seen.add(r[1] if len(r)>1 else '')
 print('問題なし ✅' if not bad else f'{bad}件の指摘')

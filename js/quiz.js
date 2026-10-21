@@ -55,7 +55,14 @@ function award(p,avg,miss,heard){const f=p>=80?(miss&&p<100?'m':heard?'h':'n'):'
  let i=TL.findIndex(o=>ok(o)&&avg>o.t[0]&&avg<=o.t[1]);if(i<0)i=TL.findIndex(ok);
  return give(i)}
 const hear=slow=>{Q.sp=(Q.sp||0)+1;speak(Q.cur.it.a[S.lang],0,slow)}; // 発音ボタン（ヒント・ゆっくり・もういちど）。使った回数を数える
-function start(){
+// 再読み込みしても、問題の途中から続けられるよう、sessionStorage（ブラウザを閉じると消える）に問題の状態を保存する
+const QK='kp_q';
+function qsave(){try{if(!Q||!Q.cur)return;const c=Q.cur;sessionStorage.setItem(QK,JSON.stringify({q:{n:Q.n,c:Q.c,ms:Q.ms,total:Q.total,p:Q.p,sp:Q.sp||0,rc:Q.rc,wrong:Q.wrong.map(x=>x.k)},c:{k:c.it.k,ans:c.ans,d:c.d,txt:c.txt,mode:c.mode,alang:c.alang,opts:c.opts},lock:Q.lock?1:0}))}catch(e){}}
+function qclear(){try{sessionStorage.removeItem(QK)}catch(e){}}
+function qrestore(){try{const s=JSON.parse(sessionStorage.getItem(QK)||'null');if(!s)return false;const m=new Map(P.map(x=>[x.k,x])),it=m.get(s.c.k);if(!it)return false;
+ const cur={...s.c,it};delete cur.k;Q={...s.q,wrong:s.q.wrong.map(k=>m.get(k)).filter(Boolean),at:0,lock:0,cur};
+ if(s.lock)next();else draw();return true}catch(e){return false}}
+function start(){rclear();
  if(S.ans!='tr'&&!SS){alert('この端末・ブラウザは読み上げに対応していないため、聞き取り・質疑応答は使えません。回答を「翻訳」にしてね');return}
  if(S.ans!='tr'&&S.vol<=0)toast('音量が0だよ。⚙で上げてね');
 Q={n:0,c:0,ms:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
@@ -83,13 +90,13 @@ function next(){clearTimeout(Q.at);
 
 function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?'単語':'文章';
  const head=md=='qa'?F[S.lang]+' '+L[S.lang]+'の質疑応答<br>声と文章の質問に、日本語で答えを選ぼう':md=='li'?'🎧 '+F[S.lang]+' '+L[S.lang]+'の聞き取り<br>聞こえた'+kn+'を'+(c.txt?'入力しよう':'選ぼう'):it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字の読み書き<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語';
- const body=md=='li'?'<h2 style="font-size:3rem;margin:6px 0">🎧</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':md=='qa'?'<h2>'+it.a[S.lang]+'</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':'<h2>'+it.a[c.d?0:S.lang]+'</h2>'+(c.d?'':'<button class=sm onclick="hear()">💡 ヒント（音声）</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>');
+ const body=md=='li'?'<h2 style="font-size:3rem;margin:6px 0">🎧</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':md=='qa'?'<h2>'+it.a[S.lang]+'</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':'<h2>'+it.a[c.d?0:S.lang]+'</h2>'+(c.d?'':'<button class=sm onclick="hear()">🔊 読み上げ</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>');
  app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
  <div class=card id=qc><small>${head} <span class=tag>${c.txt?'入力':'4択'}</span></small>${body}</div>
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="'+(md=='li'?'聞こえたことばを入力':'こたえを入力')+'" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button><div id=zc class=zc></div><div id=kbx class=kbd></div><button id=kbt type=button class="sm kt" onclick="kbToggle()"></button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
- const ti=document.getElementById('ti');if(c.txt)kbMount();if(ti&&md!='li'&&!(S.kb&&c.alang>0))ti.focus();startT();
+ const ti=document.getElementById('ti');if(c.txt)kbMount();if(ti&&md!='li'&&!(S.kb&&c.alang>0))ti.focus();startT();qsave();
  if(md!='tr')speak(it.a[S.lang])} // 聞き取り・質疑応答は、出題と同時に自動で読み上げ（ブラウザに止められたら🔊を押す）
 
 function startT(){clearTimeout(tm);Q.t0=Date.now();
@@ -106,7 +113,7 @@ function ans(i,txt){
  Q.ms+=out?S.time*1000:Date.now()-Q.t0;
  const o=D.items[key]||(D.items[key]={c:0,w:0,s:0}),t=D.tot[S.lang]||(D.tot[S.lang]={n:0,c:0});
  t.n++;if(ok){o.c++;o.s=Math.max(0,o.s-1);t.c++;Q.c++}else{o.w++;o.s+=2;Q.wrong.push(c.it)}
- Q.n++;save();fx(ok);
+ Q.n++;save();qsave();fx(ok);
  document.getElementById('qc').classList.add(ok?'okc':'ngc');
  document.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=1;if(c.opts[j]==c.ans)b.classList.add('ok');else if(j==i)b.classList.add('ng')});
  const ti=document.getElementById('ti');if(ti){ti.disabled=1;ti.classList.add(ok?'ok':'ng');ti.nextElementSibling.remove();['zc','kbx','kbt'].forEach(i=>{const e=document.getElementById(i);if(e)e.remove()})}
@@ -117,11 +124,16 @@ function ans(i,txt){
  if(S.auto)Q.at=setTimeout(next,ok?1300:2600)}
 
 function quit(){clearTimeout(tm);clearTimeout(Q.at);result(Q.n<=10&&!(Q.total&&Q.n>=Q.total))} // 10問以内でおわると、リタイア称号（1問も解かなくてもOK）
-function result(intr){clearTimeout(tm);clearTimeout(Q.at);
+function result(intr){clearTimeout(tm);clearTimeout(Q.at);qclear();
  const p=Q.n?Math.round(Q.c/Q.n*100):0,avg=Q.n?Q.ms/Q.n/1000:0,miss=Q.wrong.some(x=>((D.items[S.lang+x.k]||{}).w||0)>=3),r=intr?awardI(Q.n,p):award(p,avg,miss,(Q.sp||0)>0);
  if(Q.n){D.hist.push({d:new Date().toLocaleDateString('ja-JP'),l:S.lang,n:Q.n,c:Q.c});D.hist=D.hist.slice(-30)}save();
  const seen=[...new Set(Q.wrong.map(x=>x.k))].map(k=>Q.wrong.find(x=>x.k==k));
- app.innerHTML=`<div class=card><div class=chr>${r.ch}</div><small>${intr?'リタイアした あなたの称号は…':'あなたの称号は…'}</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
+ const tier=intr&&Q.n<=3?5:tierOf(p,Q.n); // 速攻リタイア（3問以内）は一番暗い曲・エフェクト
+ app.innerHTML=`<div class=card id=rcard data-tier=${tier}><div class=chr>${r.ch}</div><small>${intr?'リタイアした あなたの称号は…':'あなたの称号は…'}</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
  <div style="font-size:1.2rem;margin-top:8px">${!Q.n?'1問も解かずにリタイア':intr?'ここまで '+Q.n+'問 ・ '+Q.c+'問 正解（'+p+'%）':Q.n+'問中 '+Q.c+'問 正解（'+p+'%）'}</div>${intr?'<small>10問以内でおわったので、リタイア称号です</small><br>':''}${Q.n?'<small>平均 '+avg.toFixed(1)+'秒 / 問</small>':''}</div>
  ${seen.length?'<h3>まちがえた問題（多めに出ます）</h3>'+seen.map(x=>`<div class=row><span>${x.a[0]}</span><span>${x.a[S.lang]}</span></div>`).join(''):Q.n?'<h3>ノーミス！すごい🎊</h3>':''}
- <button class=big onclick="start()">もう一回！</button><button class="big alt" onclick="home()">ホームへ</button>`}
+ <button class=big onclick="start()">もう一回！</button><button class="big alt" onclick="home()">ホームへ</button>`;
+ try{sessionStorage.setItem('kp_r',JSON.stringify({html:app.innerHTML,tier}))}catch(e){}
+ resultFx(tier)}
+function rclear(){try{sessionStorage.removeItem('kp_r')}catch(e){}}
+function rrestore(){try{const s=JSON.parse(sessionStorage.getItem('kp_r')||'null');if(!s)return false;app.innerHTML=s.html;resultFx(s.tier);return true}catch(e){return false}}

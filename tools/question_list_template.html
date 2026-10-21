@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>問題一覧（開発者用）</title>
+<style>
+:root{--bg:#f4f7fb;--ink:#22254a;--card:#fff;--line:#d5dbea;--sub:#6a6f96;--p:#ff6f61;--y:#ffd23f;--bad:#d93a3a;--warn:#b26b00;--ok:#1f9d82}
+@media(prefers-color-scheme:dark){:root{--bg:#1b1d3a;--ink:#eceafc;--card:#272a52;--line:#3d4178;--sub:#a9acd8;--bad:#ff7b7b;--warn:#ffc266;--ok:#58d6bb}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,"Hiragino Sans","Yu Gothic",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:2px solid var(--line);padding:8px 12px}
+h1{font-size:1rem;margin:0 0 6px}h1 small{color:var(--sub);font-weight:400}
+.tabs,.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0}
+button,select,input,textarea{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:4px 10px}
+button{cursor:pointer}button.on{background:var(--y);color:#222;border-color:#222}
+input[type=search],textarea{min-width:220px;flex:1}textarea{min-height:34px;height:34px;resize:vertical}
+.sum{color:var(--sub);font-size:.85rem}
+main{padding:10px 12px 60px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:1100px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:4px 7px;vertical-align:top;text-align:left}
+th{position:sticky;top:var(--hh,96px);background:var(--card);z-index:2;font-size:.8rem;white-space:nowrap}
+td.n{color:var(--sub);white-space:nowrap;font-size:.78rem}td.lv{white-space:nowrap}
+td.t{cursor:pointer}td.t:hover{background:rgba(255,210,63,.25)}
+tr.flag td{background:rgba(255,111,97,.12)}tr.issue td.ja{border-left:4px solid var(--warn)}
+.b{display:inline-block;padding:0 6px;border-radius:99px;font-size:.72rem;margin:1px 2px 1px 0;border:1px solid currentColor;white-space:nowrap}
+.b.bad{color:var(--bad)}.b.warn{color:var(--warn)}.b.info{color:var(--sub)}
+.act{white-space:nowrap}.note{font-size:.78rem;color:var(--bad);margin-top:2px}
+.ok{color:var(--ok);font-weight:700}.ng{color:var(--bad)}
+.pg{display:flex;gap:6px;align-items:center;margin:8px 0}
+dialog{border:2px solid var(--ink);border-radius:12px;background:var(--card);color:var(--ink);max-width:min(720px,94vw)}
+pre{white-space:pre-wrap;word-break:break-all;margin:0;max-height:50vh;overflow:auto;font-size:.82rem}
+.src{color:var(--sub);font-size:.72rem}
+</style></head><body>
+<header>
+ <h1>問題一覧（開発者用）<small>　自分のパソコンだけで見るページです。公開サイトには出ません。　作成：/*BUILT*/</small></h1>
+ <div class="tabs" id="tabs"></div>
+ <div class="bar">
+  <select id="lv"></select><select id="iss"><option value="">すべて</option><option value="issue">⚠ 自動チェックで引っかかったもの</option><option value="flag">⚑ 自分で印をつけたもの</option></select><select id="typ"></select>
+  <textarea id="q" rows="1" placeholder="検索（空白区切り＝すべて含む／改行＝どれか）。フォームの意見をそのまま貼ってもOK"></textarea>
+  <button id="clr">クリア</button><button id="exp">⚑ 印とメモをまとめてコピー</button><button id="rep">⚠ 自動チェックの一覧</button>
+ </div>
+ <div class="sum" id="sum"></div>
+</header>
+<main><div id="view"></div><div class="pg" id="pg"></div></main>
+<dialog id="dlg"><pre id="dtx"></pre><div class="bar"><button id="dcp">コピー</button><button id="dcl">閉じる</button></div></dialog>
+<script>
+const DATA=/*DATA*/null;
+const LN=['日本語','英語','中国語','韓国語','スペイン語','イタリア語','タイ語','ベトナム語'],LC=['ja-JP','en-US','zh-CN','ko-KR','es-ES','it-IT','th-TH','vi-VN'],H=['日本語','EN','中文','한국어','ES','IT','ไทย','VI'];
+const TABS=[['words','単語'],['sents','文章'],['qa','質疑応答'],['basics','文字の読み書き'],['bw','基本単語']];
+let tab='words',page=0;const PS=100,$=id=>document.getElementById(id);
+const store={get(){try{return JSON.parse(localStorage.getItem('kp_dev_marks')||'{}')}catch(e){return{}}},set(m){try{localStorage.setItem('kp_dev_marks',JSON.stringify(m))}catch(e){}}};
+let marks=store.get();
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const key=(t,r)=>t+'|'+(r.a?r.a[0]:r.c||'')+(t=='bw'?'':'')
+// ---- 自動チェック ----
+const RX={cjk:/[㐀-鿿]/,kana:/[぀-ヿ]/,han:/[가-힯]/,th:/[฀-๿]/};
+function langOk(i,s){if(!s)return true;if(i==0)return RX.kana.test(s)||RX.cjk.test(s)||/^[\x00-\x7f]+$/.test(s);if(i==2)return RX.cjk.test(s);if(i==3)return RX.han.test(s);if(i==6)return RX.th.test(s);return!(RX.cjk.test(s)||RX.han.test(s)||RX.th.test(s)||RX.kana.test(s))}
+const cnt=(arr,f)=>{const m=new Map();arr.forEach(r=>{const k=f(r);if(k)m.set(k,(m.get(k)||0)+1)});return m};
+const jaDup=cnt([...DATA.words,...DATA.sents],r=>r.a[0]);
+const trDup={};for(let i=1;i<8;i++)trDup[i]=cnt(DATA.words,r=>(r.a[i]||'').toLowerCase().replace(/^(el|la|los|las|il|lo|l'|un|una|the|a|an)\s+/,''));
+function checks(t,r){const f=[];
+ if(t=='words'||t=='sents'){const a=r.a;
+  for(let i=1;i<8;i++){if(!a[i])f.push(['bad','未訳:'+H[i]]);else{if(!langOk(i,a[i]))f.push(['bad','文字種が違う:'+H[i]]);if(a[i]==a[0]&&!(i==2&&!RX.kana.test(a[0])&&RX.cjk.test(a[0])))f.push(['warn','日本語と同じ:'+H[i]]);if(a[i]!=a[i].trim()||/\s{2,}/.test(a[i]))f.push(['warn','空白がおかしい:'+H[i]])}}
+  if(jaDup.get(a[0])>1)f.push(['bad','日本語が重複']);
+  if(t=='words'){for(let i=1;i<8;i++){const k=(a[i]||'').toLowerCase().replace(/^(el|la|los|las|il|lo|l'|un|una|the|a|an)\s+/,'');if(k&&trDup[i].get(k)>1)f.push(['warn','訳が他の語と同じ:'+H[i]]);if(/[(（]/.test(a[i]||''))f.push(['warn','かっこ入り:'+H[i]])}}
+  else{const q=/[？?]/.test(a[0])||/か$/.test(a[0]),en=/\?/.test(a[1]||'');if(q!=en&&a[1])f.push(['info','疑問符が日英でちがう'])}
+  if(r.auto)f.push(['info','自動生成'])}
+ if(t=='qa'){const a=r.a;for(let i=1;i<8;i++)if(!a[i])f.push(['bad','未訳:'+H[i]]);
+  if(!r.ok||!r.ok.length)f.push(['bad','正解なし']);if(r.ng.length<3)f.push(['bad','まちがい選択肢が3未満']);
+  if(r.ok.some(o=>r.ng.includes(o)))f.push(['bad','正解がまちがい選択肢にもある']);if(new Set(r.ng).size<r.ng.length)f.push(['bad','選択肢が重複'])}
+ return f}
+// ---- 絞り込み ----
+function match(q,hay){const ls=q.split(/\n/).map(x=>x.trim()).filter(Boolean);if(!ls.length)return true;hay=hay.toLowerCase();return ls.some(l=>l.toLowerCase().split(/\s+/).every(w=>hay.includes(w)))}
+function rowsOf(){const t=tab,q=$('q').value,lv=+$('lv').value,is=$('iss').value;let rs=[];
+ if(t=='words')rs=DATA.words;else if(t=='sents')rs=DATA.sents;else if(t=='qa')rs=DATA.qa;else if(t=='basics')rs=DATA.basics.map(r=>({...r,a:[r.c,LN[r.lang]+' '+r.r+' グループ'+r.g]}));else rs=DATA.bw.flatMap((c,ci)=>c.w.map((w,i)=>({src:'basic_words.json',n:i+1,cat:c.t,a:w.slice(0,8),rd:w.slice(8)})));
+ return rs.filter(r=>{if(lv&&r.lv!=lv)return false;
+  const hay=(r.a||[]).join(' ')+' '+(r.ok||[]).join(' ')+' '+(r.ng||[]).join(' ')+' '+(r.cat||'')+' '+(r.rd||[]).join(' ');if(!match(q,hay))return false;
+  if($('typ').value&&!checks(t,r).some(x=>x[1].split(':')[0]==$('typ').value))return false;if(is=='issue'&&!checks(t,r).filter(x=>x[0]!='info').length)return false;if(is=='flag'&&!marks[key(t,r)])return false;return true})}
+// ---- 表示 ----
+function mark(t,r){return marks[key(t,r)]}
+function badges(f){return f.map(x=>`<span class="b ${x[0]}">${esc(x[1])}</span>`).join('')}
+function table(rs){const t=tab,hd=t=='qa'?['#','Lv',...H,'正解','まちがい','']:t=='basics'?['#','文字','読み・種類','']:t=='bw'?['#','区分',...H,'読み（中/韓/タイ）','']:['#','Lv',...H,''];
+ let h='<table><thead><tr>'+hd.map(x=>`<th>${x}</th>`).join('')+'</tr></thead><tbody>';
+ rs.slice(page*PS,page*PS+PS).forEach((r,i)=>{const f=checks(t,r),mk=mark(t,r),idx=rs.indexOf(r),cls=(mk?'flag ':'')+(f.some(x=>x[0]!='info')?'issue':'');
+  const act=`<td class=act><button onclick="flag(${idx})">${mk?'⚑解除':'⚑'}</button> <button onclick="memo(${idx})">📝</button> <button onclick="info(${idx})">ⓘ</button></td>`;
+  const tds=(r.a||[]).slice(0,8).map((s,k)=>`<td class="t${k==0?' ja':''}" onclick="say(${k},this)" title="タップで読み上げ">${esc(s)}${k==0?'<div>'+badges(f)+'</div>'+(mk&&mk.note?`<div class=note>📝 ${esc(mk.note)}</div>`:'')+`<div class=src>${esc(r.src)} #${r.n}</div>`:''}</td>`).join('');
+  if(t=='qa')h+=`<tr class="${cls}"><td class=n>${r.n}</td><td class=lv>${DATA.levels[r.lv-1]||r.lv}</td>${tds}<td class=ok>${esc(r.ok.join(' / '))}</td><td class=ng>${esc(r.ng.join(' / '))}</td>${act}</tr>`;
+  else if(t=='basics')h+=`<tr class="${cls}"><td class=n>${r.n||i+1}</td><td class="t" style="font-size:1.4rem" onclick="say(${r.lang},this)">${esc(r.c)}</td><td>${esc(r.a[1])}</td>${act}</tr>`;
+  else if(t=='bw')h+=`<tr class="${cls}"><td class=n>${r.n}</td><td>${esc(r.cat)}</td>${tds}<td>${esc(r.rd.join(' / '))}</td>${act}</tr>`;
+  else h+=`<tr class="${cls}"><td class=n>${r.n}</td><td class=lv>${DATA.levels[r.lv-1]||r.lv}</td>${tds}${act}</tr>`});
+ return h+'</tbody></table>'}
+let cur=[];
+function render(){cur=rowsOf();const pages=Math.max(1,Math.ceil(cur.length/PS));if(page>=pages)page=pages-1;
+ $('view').innerHTML=table(cur);
+ $('sum').textContent=`${TABS.find(x=>x[0]==tab)[1]}：${cur.length}件を表示（全${total()}件）　⚠自動チェック ${cur.filter(r=>checks(tab,r).some(x=>x[0]!='info')).length}件　⚑印 ${Object.keys(marks).filter(k=>k.startsWith(tab+'|')).length}件`;
+ $('pg').innerHTML=pages>1?`<button onclick="go(-1)">◀</button> ${page+1} / ${pages} <button onclick="go(1)">▶</button>`:'';
+ $('tabs').innerHTML=TABS.map(([k,n])=>`<button class="${k==tab?'on':''}" onclick="setTab('${k}')">${n}（${cntOf(k)}）</button>`).join('');
+ document.documentElement.style.setProperty('--hh',document.querySelector('header').offsetHeight+'px')}
+const cntOf=k=>k=='words'?DATA.words.length:k=='sents'?DATA.sents.length:k=='qa'?DATA.qa.length:k=='basics'?DATA.basics.length:DATA.bw.reduce((a,c)=>a+c.w.length,0),total=()=>cntOf(tab);
+function setTab(k){tab=k;page=0;$('lv').style.display=(k=='basics'||k=='bw')?'none':'';render()}
+function go(d){page+=d;render();window.scrollTo(0,0)}
+function flag(i){const r=cur[i],k=key(tab,r);if(marks[k])delete marks[k];else marks[k]={ja:r.a[0],t:tab,lv:r.lv,note:'',at:new Date().toLocaleString('ja-JP')};store.set(marks);render()}
+function memo(i){const r=cur[i],k=key(tab,r),m=marks[k]||{ja:r.a[0],t:tab,lv:r.lv,at:new Date().toLocaleString('ja-JP')},v=prompt('メモ（どこがおかしいか）',m.note||'');if(v===null)return;m.note=v;marks[k]=m;store.set(marks);render()}
+function info(i){const r=cur[i];$('dtx').textContent=[`ファイル: ${r.src} の ${r.n} 件目`,...(r.a||[]).map((s,k)=>LN[k]+': '+s),...(r.ok?['正解: '+r.ok.join(' / '),'まちがい: '+r.ng.join(' / ')]:[]),'自動チェック: '+(checks(tab,r).map(x=>x[1]).join('、')||'なし')].join('\n');$('dlg').showModal()}
+function say(k,td){try{const s=td.firstChild.textContent||td.textContent;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s);u.lang=LC[k];speechSynthesis.speak(u)}catch(e){}}
+$('exp').onclick=()=>{const L=Object.values(marks).map(m=>`[${m.t} ${DATA.levels[m.lv-1]||''}] ${m.ja}${m.note?' … '+m.note:''}`);$('dtx').textContent=L.length?L.join('\n'):'印をつけたものはまだありません';$('dlg').showModal()};
+$('rep').onclick=()=>{const out=[];for(const[k]of TABS.slice(0,3)){const rs=k=='words'?DATA.words:k=='sents'?DATA.sents:DATA.qa;rs.forEach(r=>{const f=checks(k,r).filter(x=>x[0]!='info');if(f.length)out.push(`[${k} ${DATA.levels[r.lv-1]||''}] ${r.a[0]} … ${f.map(x=>x[1]).join('、')}`)})}$('dtx').textContent=out.length?out.join('\n'):'自動チェックで引っかかったものはありません ✅';$('dlg').showModal()};
+$('dcp').onclick=()=>{try{navigator.clipboard.writeText($('dtx').textContent)}catch(e){}};$('dcl').onclick=()=>$('dlg').close();
+$('clr').onclick=()=>{$('typ').value='';$('q').value='';$('iss').value='';$('lv').value='0';page=0;render()};
+$('lv').innerHTML='<option value="0">すべてのレベル</option>'+DATA.levels.map((l,i)=>`<option value="${i+1}">${l}</option>`).join('');
+{const ty=new Set();[['words',DATA.words],['sents',DATA.sents],['qa',DATA.qa]].forEach(([t,rs])=>rs.forEach(r=>checks(t,r).forEach(x=>{if(x[0]!='info')ty.add(x[1].split(':')[0])})));$('typ').innerHTML='<option value="">すべての種類</option>'+[...ty].map(x=>`<option>${x}</option>`).join('')}
+['lv','iss','typ'].forEach(i=>$(i).onchange=()=>{page=0;render()});$('q').oninput=()=>{page=0;render()};
+render();
+</script></body></html>

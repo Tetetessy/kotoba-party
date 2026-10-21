@@ -57,24 +57,37 @@ const CT=(()=>{
   const cc=s=>s.split(' ').map(c=>chip(c,find(6,c)));
   const vv=[['ะ','a','า','aa'],['ิ','i','ี','ii'],['ึ','ue','ื','uue'],['ุ','u','ู','uu']];
   const dsp=c=>/[ัิ-ฺ็-๎ะาำ]/.test(c)?'◌'+c:c+'◌';
-  const vs=c=>'เโไ'.includes(c[0])?c.replace(/^([เโไ])/,'$1ก'):'ก'+c;
+  const vs=c=>'เโไแ'.includes(c[0])?c.replace(/^([เโไแ])/,'$1ก'):'ก'+c;
   const other=['เ','โ','ไ','ำ','เา'];
   const tones=bk(6).filter(p=>/่|้|๊|๋/.test(p.a[6]));
+  const more=['แ','เะ','โะ','เอ','ฤ','เีย','เือ','ัว'],syl=bk(6).filter(p=>p.g==5);
   const nums=bk(6).filter(p=>/[๐-๙]/.test(p.a[6]));
   return head(6)+`<small><span class=ph>タップすると発音が聞けます。</span><span class=ph>表記はローマ字です。</span></small>
   <div class="card hg"><h2>① 子音（42文字）</h2><small>タイ語の子音は、音の高さで3グループ（中・高・低）に分かれます</small>
   <h3>中子音（9）</h3>${row(cc(cls.mid),'g4')}<h3>高子音（10）</h3>${row(cc(cls.hi),'g4')}<h3>低子音（23）</h3>${row(cc(cls.lo),'g4')}</div>
   <div class="card hg"><h2>② 母音</h2><small>◌ は子音の位置です。短い音と長い音のペアです</small>
   <table class=hgt style="table-layout:auto"><tr><th>短い音</th><th>長い音</th></tr>${vv.map(v=>`<tr><td>${chip(dsp(v[0]),v[1],'',vs(v[0]))}</td><td>${chip(dsp(v[2]),v[3],'',vs(v[2]))}</td></tr>`).join('')}</table>
-  <h3>そのほかの母音</h3>${row(other.map(c=>chip(dsp(c),find(6,c),'',vs(c))),'g4')}</div>
+  <h3>そのほかの母音</h3>${row(other.map(c=>chip(dsp(c),find(6,c),'',vs(c))),'g4')}
+  <h3>形が変わる母音・複合母音</h3>${row(more.map(c=>chip(/ฤ/.test(c)?c:vs(c),find(6,c),'',/ฤ/.test(c)?c:vs(c))),'g4')}</div>
   <div class="card hg"><h2>③ 声調記号（4つ）</h2>${row(tones.map(p=>chip(p.a[6],p.a[0])),'g4')}</div>
-  <div class="card hg"><h2>④ 数字（0〜9）</h2>${row(nums.map((p,i)=>chip(p.a[6],p.a[0],i)),'g5')}</div>`+tail};
+  <div class="card hg"><h2>④ 数字（0〜9）</h2>${row(nums.map((p,i)=>chip(p.a[6],p.a[0],i)),'g5')}</div>
+  <div class="card hg"><h2>⑤ 音節（子音＋母音）</h2><small>子音と母音を組み合わせた読みの練習です</small>${row(syl.map(p=>chip(p.a[6],p.a[0])),'g5')}</div>`+tail};
  // ---- ベトナム語 ----
  const vi=()=>{const tn=[['ma','ngang','平らな音（記号なし）'],['mà','huyền','低く下がる（`）'],['má','sắc','高く上がる（´）'],['mả','hỏi','下がって上がる（˒）'],['mã','ngã','途中で切れて上がる（~）'],['mạ','nặng','低く重い（.）']];
-  const tl=bk(7).slice(0,6),al=bk(7).slice(6);
+  const tl=bk(7).filter(p=>p.g==1),al=bk(7).filter(p=>(p.g==2||p.g==3)&&p.a[7].length==1),dg=bk(7).filter(p=>p.g==3&&p.a[7].length==2),tv=bk(7).filter(p=>p.g==4);
+  const vw=[...new Set(tv.map(p=>p.a[7].normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g,'').normalize('NFC')))];
   return head(7)+`<small><span class=ph>タップすると発音が聞けます。</span><span class=ph>下の小さな文字は、文字の名前です。</span></small>
   <div class="card hg"><h2>① 声調（6つ）</h2><small>ma に記号を付けると、音の高さと意味が変わります</small>${row(tl.map((p,i)=>chip(p.a[7],p.a[0],'',p.a[7])),'g3')}
   <table class=hgt style="table-layout:auto;margin-top:6px">${tn.map(t=>`<tr><th style="text-align:left">${t[0]}</th><td style="padding:2px 6px">${t[1]}：${t[2]}</td></tr>`).join('')}</table></div>
   <div class="card hg"><h2>② アルファベット（29文字）</h2>${row(al.map(p=>chip(p.a[7],p.a[0])),'g4')}
-  <small>ベトナム語のアルファベットは、f・j・w・z を使いません。ă â ê ô ơ ư đ は、ベトナム語の特別な文字です。</small></div>`+tail};
- return{zh,th,vi}})();
+  <small>ベトナム語のアルファベットは、f・j・w・z を使いません。ă â ê ô ơ ư đ は、ベトナム語の特別な文字です。</small>
+  <h3>二文字でひとつの子音（5つ）</h3>${row(dg.map(p=>chip(p.a[7],p.a[0])),'g5')}</div>
+  <div class="card hg"><h2>③ 声調つき母音（12×5）</h2><small>母音に声調記号を付けた形です（左から sắc・huyền・hỏi・ngã・nặng）</small>${vw.map(v=>row(tv.filter(p=>p.a[7].normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g,'').normalize('NFC')==v).map(p=>chip(p.a[7],p.a[0])),'g5 vt')).join('')}</div>`+tail};
+
+ // ---- 英語・スペイン語・イタリア語（アルファベット表）----
+ const alpha=(l,rows,note,title)=>()=>head(l)+`<small><span class=ph>タップすると発音が聞けます。</span><span class=ph>上は文字の名前、下は例のことばです。</span></small>
+  <div class="card hg"><h2>① ${title}</h2>${note}${row(rows.map(([c,n,w])=>chip(c+' '+c.toLowerCase(),w,n,c)),'g4')}</div>`+tail;
+ const en=alpha(1,[['A','ei','apple'],['B','bee','banana'],['C','cee','cat'],['D','dee','dog'],['E','ee','egg'],['F','eff','fish'],['G','gee','girl'],['H','aitch','hat'],['I','eye','ice'],['J','jay','juice'],['K','kay','key'],['L','ell','lemon'],['M','em','milk'],['N','en','nose'],['O','oh','orange'],['P','pee','pen'],['Q','cue','queen'],['R','ar','rain'],['S','ess','sun'],['T','tee','tea'],['U','you','umbrella'],['V','vee','violin'],['W','double-u','water'],['X','ex','box'],['Y','why','yellow'],['Z','zee','zoo']],'<small>英語のアルファベットは26文字です。大文字と小文字があります。</small>','アルファベット（26文字）');
+ const es=alpha(4,[['A','a','agua'],['B','be','barco'],['C','ce','casa'],['D','de','dedo'],['E','e','escuela'],['F','efe','fruta'],['G','ge','gato'],['H','hache','hotel'],['I','i','isla'],['J','jota','jugo'],['K','ka','kilo'],['L','ele','luna'],['M','eme','mesa'],['N','ene','nube'],['Ñ','eñe','año'],['O','o','ojo'],['P','pe','pan'],['Q','cu','queso'],['R','erre','rojo'],['S','ese','sol'],['T','te','taza'],['U','u','uva'],['V','uve','vaso'],['W','uve doble','wifi'],['X','equis','xilófono'],['Y','ye','yate'],['Z','zeta','zapato']],'<small>スペイン語のアルファベットは27文字です（Ñ があります）。h は発音しません。</small>','アルファベット（27文字）');
+ const it=alpha(5,[['A','a','albero'],['B','bi','bambino'],['C','ci','casa'],['D','di','dado'],['E','e','estate'],['F','effe','fiore'],['G','gi','gatto'],['H','acca','hotel'],['I','i','isola'],['L','elle','luna'],['M','emme','mela'],['N','enne','naso'],['O','o','occhio'],['P','pi','pane'],['Q','cu','quadro'],['R','erre','rosa'],['S','esse','sole'],['T','ti','tavolo'],['U','u','uva'],['V','vu','vino'],['Z','zeta','zaino'],['J','i lunga','jeans'],['K','cappa','kiwi'],['W','doppia vu','weekend'],['X','ics','xilofono'],['Y','ipsilon','yogurt']],'<small>イタリア語のアルファベットは21文字です。最後の J・K・W・X・Y は、外来語に使います。h は発音しません。</small>','アルファベット（21+5文字）');
+ return{zh,th,vi,en,es,it}})();
