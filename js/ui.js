@@ -64,11 +64,7 @@ function tbl(tab){const cf={3:HGT.html,2:CT.zh,6:CT.th,7:CT.vi,1:CT.en,4:CT.es,5
 function BWHTML(){const l=S.lang,rd=({2:8,3:9,6:10})[l];
  const chip=w=>`<button class=hc onclick="speak('${w[l].replace(/'/g,"\\'")}')">${rd?`<small>${w[rd]}</small>`:''}<b${w[l].length>9?' class=lg':''}>${w[l]}</b><i>${w[0]}</i></button>`;
  return `<h1 class=ctt><span class=ph>💬 ${LS[l]}の</span><span class=ph>基本単語</span></h1><small><span class=ph>タップすると発音が聞けます。</span><span class=ph>下の小さな文字は日本語です。</span></small>`
- +BW.map((c,i)=>`<div class="card hg"><h2>${'①②③④⑤⑥⑦'[i]||''} ${c.t}（${c.w.length}）</h2><div class="hrow g3 bw">${c.w.map(chip).join('')}</div></div>`).join('')+PTHTML()+'<button class=big onclick="home()">もどる</button>'}
-// 助詞の表: 既存の例文の中で、どの助詞が使われているかを［ ］で示す。訳は選んだ言語で表示
-function PTHTML(){if(!PT)return '';const l=S.lang;
- const ex=(p,ja,i)=>{const r=P.find(x=>x.t=='s'&&x.a[0]==ja);if(!r||!r.a[l])return '';const k=ja.slice(0,i)+'['+p+']'+ja.slice(i+1);return `<button class=hc onclick="speak('${r.a[l].replace(/'/g,"\\'")}')"><small>${k}</small><b${r.a[l].length>26?' class=lg':''}>${r.a[l]}</b></button>`};
- return `<div class="card hg"><h2>助詞（文の中での使い方）</h2><small>［ ］の部分が、その助詞です。タップすると発音が聞けます。</small>`+Object.entries(PT).map(([p,list])=>`<h3>「${p}」</h3><div class="hrow g3 bw">${list.map(([ja,i])=>ex(p,ja,i)).join('')}</div>`).join('')+'</div>'}
+ +BW.map((c,i)=>`<div class="card hg"><h2>${'①②③④⑤⑥⑦'[i]||''} ${c.t}（${c.w.length}）</h2><div class="hrow g3 bw">${c.w.map(chip).join('')}</div></div>`).join('')+'<button class=big onclick="home()">もどる</button>'}
 function acct(){const e=m=>`<div class=err id=er>${m||''}</div>`;
  app.innerHTML=ACC?`<h1>👤 アカウント</h1><div class=card><small>${ACC}</small><h3>なまえ（12文字まで）</h3>
  <input id=nm class=in value="${AC[ACC].name}"><button class="big m" onclick="rename(nm.value);acct()">なまえを変更</button></div>
