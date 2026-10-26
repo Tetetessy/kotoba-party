@@ -28,18 +28,18 @@ const HGT=(()=>{
  <small>ㅇ の音(ng)は、鼻にかかった「ン」です。ㄴ のパッチムと同じカタカナになるので、ローマ字で区別してね。</small>
  <h3>すべてのパッチム（27個）</h3>${row(TN.map((x,i)=>i?pc(i):'').join(''))}
  <small>二重パッチム（ㄳ ㄵ ㄶ ㄺ ㄻ ㄼ ㄽ ㄾ ㄿ ㅀ ㅄ）は、ふつう片方だけ読みます。例外もあります（例：읽고 は ㄺ を l と読む など）。</small></div>
- <button class=big onclick="home()">もどる</button>`;
+ <button class="big nav" onclick="home()">もどる</button>`;
  return{html}})();
 
 
 // ===== 中国語・タイ語・ベトナム語の文字表（韓国語と同じく、表にまとめる）=====
 const CT=(()=>{
- const chip=(big,sm,top,say)=>`<button class=hc onclick="speak('${say||big}')">${top?`<small>${top}</small>`:''}<b>${big}</b><i>${sm}</i></button>`;
+ const chip=(big,sm,top,say)=>`<button class=hc onclick="speak('${say||big}')">${top?`<small>${top}</small>`:''}<b>${big}</b>${sm?`<i>${sm}</i>`:''}</button>`;
  const row=(a,c)=>`<div class="hrow${c?' '+c:''}">${a.join('')}</div>`;
  const bk=l=>P.filter(p=>p.lg==l);
  const find=(l,ch)=>{const x=bk(l).find(p=>p.a[l]==ch);return x?x.a[0]:''};
  const head=(l,flag)=>`<h1 class=ctt><span class=ph>📖 ${LS[l]}の</span><span class=ph>文字表</span></h1>`;
- const tail='<button class=big onclick="home()">もどる</button>';
+ const tail='<button class="big nav" onclick="home()">もどる</button>';
  // ---- 中国語 ----
  const zh=()=>{const tone=[['ā','第1声','高く平ら'],['á','第2声','上がる'],['ǎ','第3声','低く下がって上がる'],['à','第4声','一気に下がる'],['a','軽声','軽く短く']];
   const ma=['mā','má','mǎ','mà','ma'];
@@ -85,8 +85,8 @@ const CT=(()=>{
   <div class="card hg"><h2>③ 声調つき母音（12×5）</h2><small>母音に声調記号を付けた形です（左から sắc・huyền・hỏi・ngã・nặng）</small>${vw.map(v=>row(tv.filter(p=>p.a[7].normalize('NFD').replace(/[\u0300\u0301\u0303\u0309\u0323]/g,'').normalize('NFC')==v).map(p=>chip(p.a[7],p.a[0])),'g5 vt')).join('')}</div>`+tail};
 
  // ---- 英語・スペイン語・イタリア語（アルファベット表）----
- const alpha=(l,rows,note,title)=>()=>head(l)+`<small><span class=ph>タップすると発音が聞けます。</span><span class=ph>上は文字の名前、下は例のことばです。</span></small>
-  <div class="card hg"><h2>① ${title}</h2>${note}${row(rows.map(([c,n,w])=>chip(c+' '+c.toLowerCase(),w,n,c)),'g4')}</div>`+tail;
+ const alpha=(l,rows,note,title)=>()=>head(l)+`<small><span class=ph>タップすると発音が聞けます。</span><span class=ph>文字の下に、読み方を書いています。</span></small>
+  <div class="card hg"><h2>① ${title}</h2>${note}${row(rows.map(([c,n,w])=>chip(c+' '+c.toLowerCase(),'',n,c)),'g4')}</div>`+tail;
  const en=alpha(1,[['A','ei','apple'],['B','bee','banana'],['C','cee','cat'],['D','dee','dog'],['E','ee','egg'],['F','eff','fish'],['G','gee','girl'],['H','aitch','hat'],['I','eye','ice'],['J','jay','juice'],['K','kay','key'],['L','ell','lemon'],['M','em','milk'],['N','en','nose'],['O','oh','orange'],['P','pee','pen'],['Q','cue','queen'],['R','ar','rain'],['S','ess','sun'],['T','tee','tea'],['U','you','umbrella'],['V','vee','violin'],['W','double-u','water'],['X','ex','box'],['Y','why','yellow'],['Z','zee','zoo']],'<small>英語のアルファベットは26文字です。大文字と小文字があります。</small>','アルファベット（26文字）');
  const es=alpha(4,[['A','a','agua'],['B','be','barco'],['C','ce','casa'],['D','de','dedo'],['E','e','escuela'],['F','efe','fruta'],['G','ge','gato'],['H','hache','hotel'],['I','i','isla'],['J','jota','jugo'],['K','ka','kilo'],['L','ele','luna'],['M','eme','mesa'],['N','ene','nube'],['Ñ','eñe','año'],['O','o','ojo'],['P','pe','pan'],['Q','cu','queso'],['R','erre','rojo'],['S','ese','sol'],['T','te','taza'],['U','u','uva'],['V','uve','vaso'],['W','uve doble','wifi'],['X','equis','xilófono'],['Y','ye','yate'],['Z','zeta','zapato']],'<small>スペイン語のアルファベットは27文字です（Ñ があります）。h は発音しません。</small>','アルファベット（27文字）');
  const it=alpha(5,[['A','a','albero'],['B','bi','bambino'],['C','ci','casa'],['D','di','dado'],['E','e','estate'],['F','effe','fiore'],['G','gi','gatto'],['H','acca','hotel'],['I','i','isola'],['L','elle','luna'],['M','emme','mela'],['N','enne','naso'],['O','o','occhio'],['P','pi','pane'],['Q','cu','quadro'],['R','erre','rosa'],['S','esse','sole'],['T','ti','tavolo'],['U','u','uva'],['V','vu','vino'],['Z','zeta','zaino'],['J','i lunga','jeans'],['K','cappa','kiwi'],['W','doppia vu','weekend'],['X','ics','xilofono'],['Y','ipsilon','yogurt']],'<small>イタリア語のアルファベットは21文字です。最後の J・K・W・X・Y は、外来語に使います。h は発音しません。</small>','アルファベット（21+5文字）');

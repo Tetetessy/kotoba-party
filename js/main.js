@@ -4,7 +4,7 @@ function startUp(){if(RUN.get()){if(!qrestore()&&!rrestore())home()}else showTit
 function showTitle(){RUN.set(0);qclear();rclear();stopVoice();try{document.getElementById('rfx')&&document.getElementById('rfx').remove()}catch(e){}
  const L=['Hello','¡Hola!','Ciao','你好','안녕','สวัสดี','Xin chào'],C=['#ff6f61','#ffd23f','#2ec4a6','#7c5cff','#ff8fb8','#4aa8ff','#ffa94d'];
  const fx='<div class=tfx>'+[8,24,42,60,76,90].map((x,i)=>'<i class=tb style="left:'+x+'%;animation-delay:'+(i*1.3)+'s;animation-duration:'+(9+i%3*2)+'s;filter:hue-rotate('+i*55+'deg)">🎈</i>').join('')+Array.from({length:14},(_,i)=>'<b class=tcf style="left:'+(4+i*7)+'%;background:'+C[i%7]+';animation-delay:'+(i*.45)+'s;animation-duration:'+(5+i%4)+'s"></b>').join('')+'</div>';
- app.innerHTML=fx+'<div class=ttl><div class=tbub>'+L.map((t,i)=>'<span style="background:'+C[i]+';animation-delay:'+(i*.15)+'s,'+(.9+i*.25)+'s">'+t+'</span>').join('')+'</div><div class=tlogo>🎈<h1>ことばパーティ</h1><div class=tsub>7つの言葉で、たのしく学ぼう！</div></div><button class="big tgo">▶ はじめる</button><div class=ttap>画面をタッチしても始まるよ</div></div>';
+ app.innerHTML=fx+'<button class="sm nav" onclick="optOpen()">⚙</button><div class=ttl><div class=tbub>'+L.map((t,i)=>'<span style="background:'+C[i]+';animation-delay:'+(i*.15)+'s,'+(.9+i*.25)+'s">'+t+'</span>').join('')+'</div><div class=tlogo>🎈<h1>ことばパーティ</h1><div class=tsub>7つの言葉で、たのしく学ぼう！</div></div><button class="big tgo">▶ はじめる</button><div class=ttap>画面をタッチしても始まるよ</div></div>';
  const go=()=>{RUN.set(1);home()};
  app.querySelector('.tgo').onclick=e=>{e.stopPropagation();go()};
  app.querySelector('.ttl').onclick=go;

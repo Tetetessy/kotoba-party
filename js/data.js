@@ -2,11 +2,11 @@
 // 言語番号: 1英 2中 3韓 4西 5伊 6タイ 7ベトナム（問題データの配列の添字と同じ。0は日本語）
 const LS=['','英語','中国語','韓国語','スペイン語','イタリア語','タイ語','ベトナム語'],NT=['','English','中文','한국어','Español','Italiano','ภาษาไทย','Tiếng Việt'];
 const L=LS.map((x,i)=>i?x+'（'+NT[i]+'）':''),F=['','🇺🇸','🇨🇳','🇰🇷','🇪🇸','🇮🇹','🇹🇭','🇻🇳'],V=['','en-US','zh-CN','ko-KR','es-ES','it-IT','th-TH','vi-VN'],ORD=[1,4,5,2,3,6,7]; // 表示順: 英・西・伊・中・韓・タイ・ベトナム
-let BW=[],LV=['すべて'],TB=0,GID={},POS={},RN=[];const P=[];
+let DIFF={},SNOTE={},BW=[],FORMS={},BSL=[],LV=['すべて'],TB=0,GID={},POS={},RN=[],CZ={},GRAM={},CHK={};const P=[];
 async function load(){
  const j=f=>fetch('data/'+f).then(r=>{if(!r.ok)throw 0;return r.json()});
  const [w,s,t,m]=await Promise.all(['words','sentences','templates','meta'].map(n=>j(n+'.json')));
- LV=['すべて',...m.levels];
+ 
  const tb=await j('sentences_tatoeba.json').catch(()=>[]);TB=tb.length>0; // 任意: Tatoeba由来の例文
  (await j('synonyms.json').catch(()=>[])).forEach((g,i)=>g.forEach(x=>GID[norm(x)]=i)); // 同義語グループ
  tb.forEach(a=>P.push({k:'s'+a[1],t:'s',l:+a[0],a:a.slice(1)}));
@@ -18,9 +18,19 @@ async function load(){
  // 質疑応答: data/qa.json  [レベル, 日本語の質問, en, zh, ko, es, it, th, vi, [正解(日本語)…], [まちがい選択肢…]]
  (await j('qa.json').catch(()=>[])).forEach(r=>P.push({k:'q'+r[1],t:'q',l:+r[0],a:r.slice(1,9),ok:r[9],x:r[10]}));
  BW=await j('basic_words.json').catch(()=>[]);
+ DIFF=await j('diff.json').catch(()=>({})); // 基本単語の「ちがい」解説（似た形の選択肢どうしの違い）
+SNOTE=await j('sentence_notes.json').catch(()=>({})); // 文章問題の解説（文法のポイントと、まちがえやすい形との違い）
+ FORMS=await j('forms.json').catch(()=>({}));
+ GRAM=await j('grammar.json').catch(()=>({}));
+ CHK=await j('kana_chars.json').catch(()=>({})); // 文字表のカタカナ読み（言語番号→{ローマ字:カタカナ}）
  RN=await j('releases.json').catch(()=>[]);
  const ps=await j('pos.json').catch(()=>({}));Object.entries(ps).forEach(([k,v])=>v.forEach(w=>POS[w]=k)); // ヒント用の品詞
  // 文字の読み書きの基礎: data/basics.json {"3":[[ハングル,読み]],"2":[[漢字,ピンイン]]}
+ // 基本単語（文字表の基本単語タブと同じ語）を出題にも使う。「I / my / me」のような変化形は、alt に全部入れて、答えは最初の形（a）
+BW.forEach((c,ci)=>c.w.forEach((w,wi)=>{const alt=w.slice(0,8).map(s=>s.split(' / ').map(x=>x.trim()));P.push({k:'kh'+ci+'_'+wi,t:'k',l:ci+1,g:c.t,a:alt.map(f=>f[0]),alt})}));
+ // 基本単語を使った基礎の文章（data/basic_sentences.json）。分類は、BSL の順
+const BS=await j('basic_sentences.json').catch(()=>null);BSL=BS?BS.levels:[];CZ=await j('cloze.json').catch(()=>({})); // 空白つき4択（基本の文章・約4割）
+if(BS)BS.rows.forEach((r,i)=>P.push({k:'js'+i,t:'j',l:r[0],a:r.slice(1,9)}));
  const bs=await j('basics.json').catch(()=>({}));Object.entries(bs).forEach(([g,r])=>r.forEach(([c,rd,gr])=>{const a=[rd];a[g]=c;P.push({k:'b'+g+c,t:'b',l:0,lg:+g,g:gr||1,a})}));
 }
 

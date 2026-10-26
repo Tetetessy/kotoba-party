@@ -1,4 +1,19 @@
 // 出題・判定・称号
+// ===== 学ぶレベル（ビギナー／ノーマル）と内容 =====
+// ビギナー: 0=文字の読み書き、1〜5=基本単語・基本の文章の分類（w=基本単語のBW番号、s=基本の文章のBSL番号）、6=総復習（全部からランダム）
+const BEG=[{n:'⓪文字の読み書き'},{n:'①呼び方',w:[0],s:[0]},{n:'②動詞',w:[1],s:[1]},{n:'③指示・形容詞・状態',w:[3,5],s:[4]},{n:'④名詞・時・場所',w:[2,6],s:[2]},{n:'⑤返事・言葉',w:[4,7],s:[3,5]},{n:'⑥総復習（ランダム）',all:1}];
+// ノーマル: 1〜6は従来の内容（問題データのレベル）、7=総復習（全部からランダム）
+const NOR=['①自己紹介','②日常会話','③旅行/買い物','④食事/外食','⑤学校/仕事','⑥気持ち/考え','⑦総復習（ランダム）'];
+const stg=()=>S.ans=='qa'?'n':S.stage; // 質疑応答は、いつもノーマルの内容
+// 内容 c（既定は今の選択）と学ぶレベル st に、問題 x が入るか
+const inC=(x,c=S.lvl,st=stg())=>{
+ if(st=='n')return c==7?(x.t=='w'||x.t=='s'||x.t=='q'):(x.l==c&&(x.t=='w'||x.t=='s'||x.t=='q'));
+ if(c==0)return x.t=='b';
+ const g=BEG[c];if(!g)return false;
+ if(g.all)return x.t=='k'||x.t=='b';
+ return (x.t=='k'&&g.w.includes(x.l-1))||(x.t=='j'&&g.s.includes(x.l-1));
+};
+const rvp=()=>rev().filter(x=>inC(x)&&(x.t!='b'||!S.grp||x.g==S.grp)); // 今の内容の、まちがい復習
 let Q,tm;
 const okx=x=>x.a[S.lang]&&(!x.lg||x.lg==S.lang);
 const rev=()=>P.filter(x=>okx(x)&&(S.ans=='qa')==(x.t=='q')&&((D.items[S.lang+x.k]||{}).s||0)>0); // まちがい復習の対象
@@ -54,10 +69,12 @@ function award(p,avg,miss,heard){const f=p>=80?(miss&&p<100?'m':heard?'h':'n'):'
  const ok=o=>!o.q&&p>=o.a[0]&&p<=o.a[1]&&(o.f=='*'||(o.f||'')==f);
  let i=TL.findIndex(o=>ok(o)&&avg>o.t[0]&&avg<=o.t[1]);if(i<0)i=TL.findIndex(ok);
  return give(i)}
+const altOK=(c,txt)=>{const al=c.it.alt&&c.it.alt[c.d?S.lang:0];return !!al&&al.some(f=>same(txt,f,strictB(c.it)))}; // 基本単語の変化形（I / my / me など）も正解にする
+const hearAns=slow=>{Q.sp=(Q.sp||0)+1;speak(Q.cur.ans,0,slow)}; // 翻訳（日本語→外国語）の正解だけを読み上げる（ヒント用・発音を使った回数に入る）
 const hear=slow=>{Q.sp=(Q.sp||0)+1;speak(Q.cur.it.a[S.lang],0,slow)}; // 発音ボタン（ヒント・ゆっくり・もういちど）。使った回数を数える
 // 再読み込みしても、問題の途中から続けられるよう、sessionStorage（ブラウザを閉じると消える）に問題の状態を保存する
 const QK='kp_q';
-function qsave(){try{if(!Q||!Q.cur)return;const c=Q.cur;sessionStorage.setItem(QK,JSON.stringify({q:{n:Q.n,c:Q.c,ms:Q.ms,total:Q.total,p:Q.p,sp:Q.sp||0,rc:Q.rc,wrong:Q.wrong.map(x=>x.k)},c:{k:c.it.k,ans:c.ans,d:c.d,txt:c.txt,mode:c.mode,alang:c.alang,opts:c.opts},lock:Q.lock?1:0}))}catch(e){}}
+function qsave(){try{if(!Q||!Q.cur)return;const c=Q.cur;sessionStorage.setItem(QK,JSON.stringify({q:{n:Q.n,c:Q.c,ms:Q.ms,total:Q.total,p:Q.p,sp:Q.sp||0,rc:Q.rc,wrong:Q.wrong.map(x=>x.k)},c:{k:c.it.k,ans:c.ans,d:c.d,txt:c.txt,mode:c.mode,alang:c.alang,opts:c.opts,blank:c.blank},lock:Q.lock?1:0}))}catch(e){}}
 function qclear(){try{sessionStorage.removeItem(QK)}catch(e){}}
 function qrestore(){try{const s=JSON.parse(sessionStorage.getItem(QK)||'null');if(!s)return false;const m=new Map(P.map(x=>[x.k,x])),it=m.get(s.c.k);if(!it)return false;
  const cur={...s.c,it};delete cur.k;Q={...s.q,wrong:s.q.wrong.map(k=>m.get(k)).filter(Boolean),at:0,lock:0,cur};
@@ -67,18 +84,22 @@ function start(){rclear();
  if(S.ans!='tr'&&S.vol<=0)toast('音量が0だよ。⚙で上げてね');
 Q={n:0,c:0,ms:0,total:S.mode,wrong:[],rc:[],p:.3+Math.random()*.4};next()}
 function pick(){
- if(S.ans=='qa'){let pool=P.filter(x=>x.t=='q'&&okx(x)&&(!S.lvl||x.l==S.lvl));const f=pool.filter(x=>!Q.rc.includes(x.k));if(f.length>3)pool=f;
+ if(S.ans=='qa'){let pool=P.filter(x=>x.t=='q'&&okx(x)&&inC(x));const f=pool.filter(x=>!Q.rc.includes(x.k));if(f.length>3)pool=f;
   const w=pool.map(x=>S.boost?1+((D.items[S.lang+x.k]||{}).s||0)*2:1);let r=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<pool.length-1&&(r-=w[i])>0)i++;return pool[i]}
- let t=S.kind=='mix'?(Math.random()<Q.p?'s':'w'):S.kind;
- if(t=='b'&&!P.some(x=>x.lg==S.lang))t='w';
- let pool=P.filter(x=>x.t==t&&okx(x)&&(t=='b'?(!S.grp||x.g==S.grp):(!S.lvl||x.l==S.lvl)));if(!pool.length)pool=P.filter(x=>okx(x)&&x.t!='b'&&x.t!='q');
- if(S.kind=='r'){const r=rev();if(r.length)pool=r}
+ const beg=stg()=='b',wt=beg?'k':'w',st=beg?'j':'s',hasB=P.some(x=>x.lg==S.lang);
+ let t=S.kind=='w'?wt:S.kind=='s'?st:S.kind=='r'?null:(Math.random()<Q.p?st:wt); // ミックスは、単語と文章を混ぜる
+ if(beg&&S.lvl==0)t='b'; // ⓪は文字の読み書き
+ else if(beg&&S.lvl==6&&hasB&&Math.random()<.3)t='b'; // ⑥総復習には文字も少し混ぜる
+ if(t=='b'&&!hasB)t=wt;
+ let pool=S.kind=='r'?rvp():P.filter(x=>x.t==t&&okx(x)&&inC(x)&&(t!='b'||!S.grp||x.g==S.grp));
+ if(!pool.length)pool=P.filter(x=>okx(x)&&inC(x)&&x.t!='b'&&x.t!='q');
+ if(!pool.length)pool=P.filter(x=>okx(x)&&x.t!='b'&&x.t!='q');
  const f=pool.filter(x=>!Q.rc.includes(x.k));if(f.length>3)pool=f;
  const w=pool.map(x=>S.boost?1+((D.items[S.lang+x.k]||{}).s||0)*2:1); // 間違えた問題ほど出やすい
  let r=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<pool.length-1&&(r-=w[i])>0)i++;return pool[i]}
 
 function next(){clearTimeout(Q.at);
- if(S.ans!='qa'&&S.kind=='r'&&!rev().length){if(Q.n)return result();alert('まちがえた問題はまだありません。まずは「ミックス」などで遊んでみてね！');return home()}
+ if(S.ans!='qa'&&S.kind=='r'&&!rvp().length){if(Q.n)return result();alert('まちがえた問題はまだありません。まずは「ミックス」などで遊んでみてね！');return home()}
  if(Q.total&&Q.n>=Q.total)return result();
  const it=pick();Q.rc.push(it.k);if(Q.rc.length>6)Q.rc.shift();
  if(S.ans=='qa'){const ok=it.ok[Math.random()*it.ok.length|0];Q.cur={it,ans:ok,d:0,txt:0,mode:'qa',opts:shuf([ok,...shuf(it.x).slice(0,3)])};Q.lock=0;return draw()}
@@ -86,18 +107,27 @@ function next(){clearTimeout(Q.at);
  // 聞き取りは、声を聞いて外国語の文字で答える（答えは各言語の単語・文章）
  const ds0=a=>shuf([...new Set(P.filter(x=>x.t==it.t&&x.k!=it.k&&x.a[ai]&&(!x.lg||x.lg==S.lang)&&a(x)).map(x=>x.a[ai]).filter(x=>!same(x,ans,strictB(it))))]).slice(0,3);
  let ds=it.t=='b'?ds0(x=>x.g==it.g):[];if(ds.length<3)ds=ds0(()=>true); // 文字は、同じ種類から選択肢を作る
+ // 基本単語の4択は、同じ分類（呼び方・動詞・名詞など）の似た言葉を選択肢にする。
+ // スペイン語・イタリア語は、同じ単語の男性形・女性形（hijo / hija など）を優先する。英語の I / my / me は文の中で正解が決まるため、この方法は使わない
+ if(it.t=='k'){const al=it.alt&&ai==S.lang&&(S.lang==4||S.lang==5)?it.alt[ai].filter(f=>f!=ans):[];
+  ds=shuf(al).slice(0,3);
+  if(ds.length<3)ds=[...ds,...ds0(x=>x.t=='k'&&x.g==it.g).filter(x=>!ds.includes(x))].slice(0,3);
+  if(ds.length<3)ds=[...ds,...ds0(()=>true).filter(x=>!ds.includes(x))].slice(0,3)}
+ // 基本の文章の約4割は、空白に入る言葉を4択から選ぶ（同じ文の中で形を取り違えやすい言葉を選択肢にする）
+ const cz=(it.t=='j'||it.t=='s')&&!li&&S.ans=='tr'&&!txt&&S.fmt!='t'&&CZ[it.a[0]]&&CZ[it.a[0]][S.lang]&&Math.random()<.4?CZ[it.a[0]][S.lang]:0;
+ if(cz){Q.cur={it,ans:cz.a,d:false,txt:false,mode:'cz',alang:S.lang,opts:shuf([cz.a,...cz.d]),blank:it.a[S.lang].replace(cz.a,'＿＿＿')};Q.lock=0;return draw()}
  Q.cur={it,ans,d,txt,mode:li?'li':'tr',alang:li||d?S.lang:it.t=='b'?(S.lang==7?7:1):0,opts:shuf([ans,...ds])};Q.lock=0;draw()}
 
-function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?'単語':'文章';
- const head=md=='qa'?F[S.lang]+' '+L[S.lang]+'の質疑応答<br>声と文章の質問に、日本語で答えを選ぼう':md=='li'?'🎧 '+F[S.lang]+' '+L[S.lang]+'の聞き取り<br>聞こえた'+kn+'を'+(c.txt?'入力しよう':'選ぼう'):it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字の読み書き<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語';
- const body=md=='li'?'<h2 style="font-size:3rem;margin:6px 0">🎧</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':md=='qa'?'<h2>'+it.a[S.lang]+'</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':'<h2>'+it.a[c.d?0:S.lang]+'</h2>'+(c.d?'':'<button class=sm onclick="hear()">🔊 読み上げ</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>');
- app.innerHTML=`<div class=top><button class=sm onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class=sm onclick="optOpen()">⚙</button></div>
+function draw(){const c=Q.cur,it=c.it,md=c.mode,kn=it.t=='b'?'文字':it.t=='w'?'単語':it.t=='k'?'基本単語':it.t=='j'?'基本の文章':'文章';
+ const head=md=='cz'?F[S.lang]+' '+L[S.lang]+'の文章<br>空白に入る言葉を選ぼう':md=='qa'?F[S.lang]+' '+L[S.lang]+'の質疑応答<br>声と文章の質問に、日本語で答えを選ぼう':md=='li'?'🎧 '+F[S.lang]+' '+L[S.lang]+'の聞き取り<br>聞こえた'+kn+'を'+(c.txt?'入力しよう':'選ぼう'):it.t=='b'?F[S.lang]+' '+L[S.lang]+'の文字の読み書き<br>'+(c.d?'読み → 文字':'文字 → 読み'):c.d?'日本語 → '+L[S.lang]:L[S.lang]+' → 日本語';
+ const body=md=='cz'?'<h2 style="font-size:1.6rem">'+c.blank+'</h2><small>'+it.a[0]+'</small>':md=='li'?'<h2 style="font-size:3rem;margin:6px 0">🎧</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':md=='qa'?'<h2>'+it.a[S.lang]+'</h2><button class=sm onclick="hear()">🔊 もういちど</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>':'<h2>'+it.a[c.d?0:S.lang]+'</h2>'+(c.d?'<button class=sm onclick="hearAns()">🔊 正解の音声（ヒント）</button> <button class=sm onclick="hearAns(1)">🐢 ゆっくり</button>':'<button class=sm onclick="hear()">🔊 読み上げ</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button>');
+ app.innerHTML=`<div class=top><button class="sm nav" onclick="quit()">おわる</button><span>${Q.n+1}${Q.total?' / '+Q.total:' 問目'}</span><span>⭕ ${Q.c}</span><button class="sm nav" onclick="optOpen()">⚙</button></div>
  ${S.time?'<div class=bar style="margin-top:10px"><i id=tb></i></div>':''}
  <div class=card id=qc><small>${head} <span class=tag>${c.txt?'入力':'4択'}</span></small>${body}</div>
  ${c.txt?'<input id=ti class=in autocomplete=off autocapitalize=off spellcheck=false placeholder="'+(md=='li'?'聞こえたことばを入力':'こたえを入力')+'" onkeydown="if(event.key==\'Enter\')sub()"><button class=big onclick="sub()">こたえる</button><div id=zc class=zc></div><div id=kbx class=kbd></div><button id=kbt type=button class="sm kt" onclick="kbToggle()"></button>'
  :c.opts.map((o,i)=>`<button class=opt onclick="ans(${i})">${o}</button>`).join('')}<div id=fb></div>`;
  const ti=document.getElementById('ti');if(c.txt)kbMount();if(ti&&md!='li'&&!(S.kb&&c.alang>0))ti.focus();startT();qsave();
- if(md!='tr')speak(it.a[S.lang])} // 聞き取り・質疑応答は、出題と同時に自動で読み上げ（ブラウザに止められたら🔊を押す）
+ if(md!='tr'&&md!='cz')speak(it.a[S.lang])} // 聞き取り・質疑応答は、出題と同時に自動で読み上げ（ブラウザに止められたら🔊を押す）
 
 function startT(){clearTimeout(tm);Q.t0=Date.now();
  let b=document.getElementById('tb'); // ⚙で制限時間を変えたときも、バーと実際のタイマーをそろえる
@@ -109,7 +139,7 @@ function startT(){clearTimeout(tm);Q.t0=Date.now();
 const sub=()=>ans(-2,document.getElementById('ti').value);
 function ans(i,txt){
  if(Q.lock)return;Q.lock=1;clearTimeout(tm);
- const c=Q.cur,out=i==-1,ok=!out&&(c.txt?same(txt,c.ans,strictB(c.it)):c.opts[i]==c.ans),key=S.lang+c.it.k;
+ const c=Q.cur,out=i==-1,ok=!out&&(c.txt?(same(txt,c.ans,strictB(c.it))||altOK(c,txt)):c.opts[i]==c.ans),key=S.lang+c.it.k;
  Q.ms+=out?S.time*1000:Date.now()-Q.t0;
  const o=D.items[key]||(D.items[key]={c:0,w:0,s:0}),t=D.tot[S.lang]||(D.tot[S.lang]={n:0,c:0});
  t.n++;if(ok){o.c++;o.s=Math.max(0,o.s-1);t.c++;Q.c++}else{o.w++;o.s+=2;Q.wrong.push(c.it)}
@@ -120,8 +150,8 @@ function ans(i,txt){
  const last=Q.total&&Q.n>=Q.total;
  document.getElementById('fb').innerHTML=`<div class="card fb"><h2>${ok?'🎉 せいかい！':out?'⏰ 時間切れ！':'💦 おしい！'}</h2>
  <div>${c.mode=='qa'?c.it.a[0]+'<br>'+c.it.a[S.lang]+'<br>答え：'+c.ans:c.it.a[0]+'<br>＝ '+c.it.a[S.lang]} <button class=sm onclick="hear()">👂 発音をきく</button> <button class=sm onclick="hear(1)">🐢 ゆっくり</button></div>
- <button class="big m" onclick="next()">${last?'結果を見る':'つぎへ'}</button>${S.auto?'<small>自動で進みます…</small>':''}</div>`;
- if(S.auto)Q.at=setTimeout(next,ok?1300:2600)}
+ ${diffHTML(c)}<button class="big m" onclick="next()">${last?'結果を見る':'つぎへ'}</button>${S.auto?'<small>自動で進みます…</small>':''}</div>`;
+ if(S.auto)Q.at=setTimeout(next,diffHTML(c)?8000:ok?1300:2600)}
 
 function quit(){clearTimeout(tm);clearTimeout(Q.at);result(Q.n<=10&&!(Q.total&&Q.n>=Q.total))} // 10問以内でおわると、リタイア称号（1問も解かなくてもOK）
 function result(intr){clearTimeout(tm);clearTimeout(Q.at);qclear();
@@ -132,8 +162,19 @@ function result(intr){clearTimeout(tm);clearTimeout(Q.at);qclear();
  app.innerHTML=`<div class=card id=rcard data-tier=${tier}><div class=chr>${r.ch}</div><small>${intr?'リタイアした あなたの称号は…':'あなたの称号は…'}</small><h2 style="font-size:2rem">${r.t}</h2>${r.isNew?'<span class=tag>🎁 NEW! コレクションに追加</span>':'<small>ゲット済みの称号です</small>'}
  <div style="font-size:1.2rem;margin-top:8px">${!Q.n?'1問も解かずにリタイア':intr?'ここまで '+Q.n+'問 ・ '+Q.c+'問 正解（'+p+'%）':Q.n+'問中 '+Q.c+'問 正解（'+p+'%）'}</div>${intr?'<small>10問以内でおわったので、リタイア称号です</small><br>':''}${Q.n?'<small>平均 '+avg.toFixed(1)+'秒 / 問</small>':''}</div>
  ${seen.length?'<h3>まちがえた問題（多めに出ます）</h3>'+seen.map(x=>`<div class=row><span>${x.a[0]}</span><span>${x.a[S.lang]}</span></div>`).join(''):Q.n?'<h3>ノーミス！すごい🎊</h3>':''}
- <button class=big onclick="start()">もう一回！</button><button class="big alt" onclick="home()">ホームへ</button>`;
+ <button class="sm nav" onclick="optOpen()">⚙</button><button class="big nav" onclick="start()">もう一回！</button><button class="big alt nav" onclick="home()">ホームへ</button>`;
  try{sessionStorage.setItem('kp_r',JSON.stringify({html:app.innerHTML,tier}))}catch(e){}
  resultFx(tier)}
 function rclear(){try{sessionStorage.removeItem('kp_r')}catch(e){}}
 function rrestore(){try{const s=JSON.parse(sessionStorage.getItem('kp_r')||'null');if(!s)return false;app.innerHTML=s.html;resultFx(s.tier);return true}catch(e){return false}}
+
+// ちがい解説: 基本単語の4択で、よく似た形（男性形・女性形・所有形など）を選択肢にしたとき、正解と各選択肢の違いを出す（data/diff.json）
+function diffHTML(c){
+ // 文章問題: 文法のポイント（data/sentence_notes.json）
+ const sn=c.it&&c.it.t=='j'&&typeof SNOTE!='undefined'&&SNOTE[c.it.a[0]];
+ if(sn)return `<div class=diffbox><b>📘 文法のポイント</b><ul><li>${esc(sn.g)}</li>${sn.d?`<li><b>まちがえやすい形</b>：${esc(sn.d)}</li>`:''}</ul></div>`;
+ const d=((typeof DIFF!='undefined'&&DIFF[S.lang])||{})[c.it&&c.it.a[0]];
+ if(!d||c.it.t!='k'||c.mode=='qa')return '';
+ const ops=c.opts.filter(o=>d.f[o]);
+ if(!ops.length)return '';
+ return `<div class=diffbox><b>🔍 ちがい</b>${d.note?`<small>${esc(d.note)}</small>`:''}<ul>${ops.map(o=>`<li><b>${esc(o)}</b>${o==c.ans?'<span class=dfin>正解</span>':''}<br>${esc(d.f[o])}</li>`).join('')}</ul></div>`}
