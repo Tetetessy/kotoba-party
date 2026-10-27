@@ -43,7 +43,7 @@ function home(){clearTimeout(tm);qclear();rclear();try{document.getElementById('
  app.innerHTML=`<div class=top><button class=sm onclick="acct()">👤 ${esc(uname())}</button><button class="sm nav" onclick="optOpen()">⚙</button></div>
  <h1 class=hm><span>🎈</span> ことばパーティ</h1>
  <div class=tutwrap><button class="chip on tutbanner" onclick="tutStart()">📖 チュートリアルを見る（使い方）</button></div>
- ${STORE_OK?'':'<div class="tip c warn"><span class=ph>⚠ この端末では記録が残りません</span><span class=ph>ページを閉じると、きろくは消えます</span></div>'} ${INAPP?`<div class="tip c" style="background:#fff3cd"><span class=ph>⚠ このアプリ内では</span><span class=ph>音が出ないよ。</span><span class=ph>右上メニューから</span><span class=ph>「ブラウザで開く」を選んでね</span></div>`:''}<div class="tip c info"><span class=ph>✨ ⚙で</span><span class=ph>時間・音量・</span><span class=ph>意見の送信も</span><span class=ph>できるよ</span></div>
+ ${STORE_OK?'':'<div class="tip c warn"><span class=ph>⚠ この端末では記録が残りません</span><span class=ph>ページを閉じると、きろくは消えます</span></div>'} ${INAPP?`<div class="tip c" style="background:#fff3cd"><span class=ph>⚠ このアプリ内では</span><span class=ph>音が出ないことがあるよ</span></div>`:''}<div class="tip c info"><span class=ph>✨ ⚙で</span><span class=ph>時間・音量・</span><span class=ph>意見の送信も</span><span class=ph>できるよ</span></div>
  <div class=panel>
  ${fld('f-lang','🌍 学ぶ言語',selH('f-lang','lang',ORD.map(i=>[i,F[i]+' '+L[i]]),1),`<button class="sm tbtn" onclick="tbl()">🔤 文字表を見る</button>`)}
  <div class=fld><div class=fcap><label id=f-stg>🏅 レベル</label>${qa?'<span class=note>※ 質疑応答は、ノーマルの内容です</span>':''}</div><div class=rg role=radiogroup aria-labelledby=f-stg>${STG.map(([v,n,d])=>`<button type=button role=radio aria-checked=${st==v} class="rb${st==v?' on':''}" ${qa?'disabled ':''}onclick="set('stage','${v}')"><b>${n}</b><small>（${d}）</small></button>`).join('')}</div></div>
@@ -87,12 +87,13 @@ const cellH=(c,tb)=>{const o=typeof c=='string'?{t:c}:c,rs=o.rs?` rowspan=${o.rs
 function GTG(tb){const bigs=[];let big=null,sub=null;
  const newBig=n=>{big={n,subs:[]};bigs.push(big);sub=null},newSub=n=>{if(!big)newBig('');sub={n,rows:[]};big.subs.push(sub)};
  tb.rows.forEach(r=>{const m=r[0];
+  if(r.length==1&&m&&typeof m=='object'&&m.n){if(sub)sub.note=m.t;return}
   if(r.length==1&&m&&typeof m=='object'&&m.g){m.g==1?newBig(m.t):newSub(m.t);return}
   if(m&&typeof m=='object'&&m.rs){newSub(m.t);sub.rows.push(r.slice(1));return}
   if(!sub)newSub('');sub.rows.push(r)});
  const head=`<thead><tr>${tb.head.slice(1).map(h=>`<th>${h}</th>`).join('')}</tr></thead>`;
  const tbl=rows=>`<div class=gtw><table class=gt>${head}<tbody>${rows.map(r=>`<tr>${r.map(c=>cellH(c,tb)).join('')}</tr>`).join('')}</tbody></table></div>`;
- const subH=x=>`<details class="sub"><summary class=subh><span>${x.n||'一覧'}</span><small>${x.rows.length}語</small></summary>${tbl(x.rows)}</details>`;
+ const subH=x=>`<details class="sub"><summary class=subh><span>${x.n||'一覧'}</span><small>${x.rows.length}語</small></summary>${x.note?`<small class=gtn>${x.note}</small>`:''}${tbl(x.rows)}</details>`;
  const body=bigs.map(b=>{if(!b.n)return b.subs.map(subH).join('');const n=b.subs.reduce((a,x)=>a+x.rows.length,0);
   return `<details class="sub bigg"><summary class="subh bigg"><span>${b.n}</span><small>${n}語</small></summary><div class=bigbody>${b.subs.map(subH).join('')}</div></details>`}).join('');
  return `<div class=gtw>${tb.title?`<h3 class=gtt>${tb.title}</h3>`:''}${body}</div>`}

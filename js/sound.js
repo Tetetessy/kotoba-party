@@ -43,11 +43,11 @@ function speak(t,l,slow){
    note(r=='not-allowed'?'ブラウザに音声をブロックされたよ。もう一度タップしてみてね':r=='language-unavailable'||r=='voice-unavailable'?name+'の音声が、この端末にないみたい':'読み上げに失敗したよ（端末の音声設定を確認してね）')};
   const go=()=>{try{SS.resume();SS.speak(u)}catch(e){}};
   if(SS.speaking||SS.pending){SS.cancel();APPLE?go():setTimeout(go,60)}else go();
-  setTimeout(()=>{if(!started&&!SS.speaking){rest();note(INAPP?'LINEなどのアプリ内ブラウザでは音が出ないよ。右上のメニューから「ブラウザで開く」(SafariやChrome)を選んでね':'音が始まらなかったよ。マナーモードやメディア音量、端末の読み上げ設定を確認してね')}},3500);
+  setTimeout(()=>{if(!started&&!SS.speaking){rest();note(INAPP?'LINEなどのアプリ内ブラウザでは音が出ないことがあるよ':'音が始まらなかったよ。マナーモードやメディア音量、端末の読み上げ設定を確認してね')}},3500);
  }catch(e){}}
 function stopVoice(){try{SS&&SS.cancel();DK=1;BGM.vol()}catch(e){}} // 読み上げを止めて、音量を元に戻す（タイトルに戻るとき）
 // 端末で使える音声の一覧（⚙の「読み上げテスト」で表示）
-function voiceInfo(){if(INAPP)return '⚠ アプリ内ブラウザです。音を出すにはSafari/Chromeで開いてね';if(!SS)return '読み上げに非対応のブラウザです';loadV();
+function voiceInfo(){if(INAPP)return '⚠ アプリ内ブラウザでは音が出ないことがあります';if(!SS)return '読み上げに非対応のブラウザです';loadV();
  if(!VS.length)return '音声の一覧を取得できませんでした（読み上げは試せます）';
  return '使える音声: '+ORD.map(l=>LS[l]+(VS.some(v=>vl(v).slice(0,2)==V[l].slice(0,2).toLowerCase())?'○':'×')).join('　')}
 
